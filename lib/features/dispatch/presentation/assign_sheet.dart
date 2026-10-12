@@ -464,8 +464,14 @@ class _AssignTripSheetState extends ConsumerState<AssignTripSheet> {
     String? quotedType,
   ) {
     final planned = trip.plannedQuantity ?? 0;
+    final tons = context.tr('common.tons');
+    final limit = Formatters.number(truck.tripLoadTons);
+    final capacity = Formatters.number(truck.capacityTons);
+    final load = (truck.capacityTons ?? 0) > truck.tripLoadTons + 0.01
+        ? '$limit / $capacity $tons'
+        : '$limit $tons';
     final base =
-        '${truck.plateNumber ?? ''} · ${context.l10n.truckType(truck.type, label: truck.typeLabel)} · ${Formatters.number(truck.capacityTons)} ${context.tr('common.tons')}';
+        '${truck.plateNumber ?? ''} · ${context.l10n.truckType(truck.type, label: truck.typeLabel)} · $load';
     final currentTruck = trip.truck?.id == truck.id;
     if (truck.isUnavailable ||
         (!currentTruck && truck.isBusy) ||

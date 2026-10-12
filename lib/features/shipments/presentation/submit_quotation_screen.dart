@@ -139,7 +139,7 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
   List<double> _fleetCapacities(List<Truck> trucks) {
     return trucks
         .where((item) => item.type == _truckType && !item.isUnavailable)
-        .map((item) => item.capacityTons ?? 0)
+        .map((item) => item.tripLoadTons)
         .where((capacity) => capacity > 0)
         .toList();
   }
@@ -276,7 +276,7 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
     final weightPerTrip = _loadWeightPerTrip(shipment);
     final ofType = trucks.where((item) => item.type == _truckType && !item.isUnavailable).toList();
     final maxCapacity = ofType.fold<double>(0, (max, item) {
-      final capacity = item.capacityTons ?? 0;
+      final capacity = item.tripLoadTons;
       return capacity > max ? capacity : max;
     });
     return _QuotePlan(

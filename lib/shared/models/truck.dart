@@ -10,6 +10,7 @@ class Truck {
     this.type,
     this.typeLabel,
     this.capacityTons,
+    this.tripLoadLimitTons,
     this.volumeCbm,
     this.cargoLengthM,
     this.cargoWidthM,
@@ -31,6 +32,7 @@ class Truck {
   final String? type;
   final String? typeLabel;
   final double? capacityTons;
+  final double? tripLoadLimitTons;
   final double? volumeCbm;
   final double? cargoLengthM;
   final double? cargoWidthM;
@@ -50,8 +52,22 @@ class Truck {
   bool get isUnavailable => status == 'maintenance' || status == 'inactive';
   bool get isBusy => status == 'assigned';
 
+  static const defaultTripLoadLimitTons = 25.0;
+
+  double get tripLoadTons {
+    final capacity = capacityTons ?? 0;
+    final limit = tripLoadLimitTons ?? defaultTripLoadLimitTons;
+    if (capacity <= 0) {
+      return limit > 0 ? limit : 0;
+    }
+    if (limit <= 0) {
+      return capacity;
+    }
+    return limit < capacity ? limit : capacity;
+  }
+
   bool canCarry(double plannedQuantity) {
-    return (capacityTons ?? 0) + 0.0001 >= plannedQuantity;
+    return tripLoadTons + 0.0001 >= plannedQuantity;
   }
 
   factory Truck.fromJson(Map<String, dynamic> json) {
@@ -61,6 +77,7 @@ class Truck {
       type: asString(json['type']),
       typeLabel: asString(json['type_label']),
       capacityTons: asDouble(json['capacity_tons']),
+      tripLoadLimitTons: asDouble(json['trip_load_limit_tons']),
       volumeCbm: asDouble(json['volume_cbm']),
       cargoLengthM: asDouble(json['cargo_length_m']),
       cargoWidthM: asDouble(json['cargo_width_m']),

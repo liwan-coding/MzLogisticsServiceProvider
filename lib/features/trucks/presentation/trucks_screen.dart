@@ -134,6 +134,7 @@ class TrucksScreen extends ConsumerWidget {
                   DataColumnSpec(context.tr('trucks.model')),
                   DataColumnSpec(context.tr('trucks.year')),
                   DataColumnSpec(context.tr('common.capacity')),
+                  DataColumnSpec(context.tr('trucks.tripLoadLimit')),
                   DataColumnSpec(context.tr('trucks.volume')),
                   DataColumnSpec(context.tr('trucks.assignedDriver')),
                   DataColumnSpec(context.tr('trucks.insurance')),
@@ -150,6 +151,9 @@ class TrucksScreen extends ConsumerWidget {
                   Text(item.year?.toString() ?? '—'),
                   Text(
                     '${Formatters.number(item.capacityTons, locale: locale)} ${context.tr('common.tons')}',
+                  ),
+                  Text(
+                    '${Formatters.number(item.tripLoadLimitTons ?? item.tripLoadTons, locale: locale)} ${context.tr('common.tons')}',
                   ),
                   Text(
                     item.volumeCbm == null
@@ -197,6 +201,11 @@ class TrucksScreen extends ConsumerWidget {
                       icon: Icons.scale_outlined,
                       label: context.tr('common.capacity'),
                       value: '${Formatters.number(item.capacityTons, locale: locale)} ${context.tr('common.tons')}',
+                    ),
+                    EntityFact(
+                      icon: Icons.speed_outlined,
+                      label: context.tr('trucks.tripLoadLimit'),
+                      value: '${Formatters.number(item.tripLoadLimitTons ?? item.tripLoadTons, locale: locale)} ${context.tr('common.tons')}',
                     ),
                     if (item.volumeCbm != null)
                       EntityFact(
@@ -308,6 +317,13 @@ void _showTruckDetails(
       InfoField(
         label: context.tr('trucks.capacityTons'),
         value: measure(truck.capacityTons, context.tr('common.tons')),
+      ),
+      InfoField(
+        label: context.tr('trucks.tripLoadLimit'),
+        value: measure(
+          truck.tripLoadLimitTons ?? truck.tripLoadTons,
+          context.tr('common.tons'),
+        ),
       ),
       InfoField(
         label: context.tr('trucks.volume'),

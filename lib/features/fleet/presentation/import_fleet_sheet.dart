@@ -268,6 +268,9 @@ class _ImportErrorTile extends StatelessWidget {
       if (error.field == 'capacity_tons') {
         return context.tr('trucks.importCapacityInvalid');
       }
+      if (error.field == 'trip_load_limit_tons') {
+        return context.tr('trucks.tripLoadLimitAboveCapacity');
+      }
     }
     if (namespace == 'equipment') {
       if (error.field == 'truck_plate') {

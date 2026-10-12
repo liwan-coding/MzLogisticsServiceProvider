@@ -35,6 +35,7 @@ class _TruckFormScreenState extends ConsumerState<TruckFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _plate = TextEditingController();
   final _capacity = TextEditingController();
+  final _tripLimit = TextEditingController(text: '${Truck.defaultTripLoadLimitTons.round()}');
   final _volume = TextEditingController();
   final _length = TextEditingController();
   final _width = TextEditingController();
@@ -48,12 +49,14 @@ class _TruckFormScreenState extends ConsumerState<TruckFormScreen> {
   String _status = 'available';
   var _loading = false;
   var _hydrated = false;
+  var _tripLimitTouched = false;
   final _pendingDocuments = <String, PendingUpload>{};
 
   @override
   void dispose() {
     _plate.dispose();
     _capacity.dispose();
+    _tripLimit.dispose();
     _volume.dispose();
     _length.dispose();
     _width.dispose();
@@ -73,6 +76,8 @@ class _TruckFormScreenState extends ConsumerState<TruckFormScreen> {
     _hydrated = true;
     _plate.text = truck.plateNumber ?? '';
     _capacity.text = _formatNumber(truck.capacityTons);
+    _tripLimit.text = _formatNumber(truck.tripLoadLimitTons ?? truck.tripLoadTons);
+    _tripLimitTouched = true;
     _volume.text = _formatNumber(truck.volumeCbm);
     _length.text = _formatNumber(truck.cargoLengthM);
     _width.text = _formatNumber(truck.cargoWidthM);
@@ -127,6 +132,7 @@ class _TruckFormScreenState extends ConsumerState<TruckFormScreen> {
       'plate_number': _plate.text.trim(),
       'type': type,
       'capacity_tons': double.parse(_capacity.text),
+      'trip_load_limit_tons': double.parse(_tripLimit.text),
       'volume_cbm': _optionalDouble(_volume),
       'cargo_length_m': _optionalDouble(_length),
       'cargo_width_m': _optionalDouble(_width),
@@ -324,21 +330,65 @@ class _TruckFormScreenState extends ConsumerState<TruckFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
+                    onChanged: (value) {
+                      if (_tripLimitTouched) {
+                        return;
+                      }
+                      final capacity = double.tryParse(value.trim());
+                      if (capacity == null || capacity <= 0) {
+                        return;
+                      }
+                      final next = capacity < Truck.defaultTripLoadLimitTons
+                          ? capacity
+                          : Truck.defaultTripLoadLimitTons;
+                      final text = _formatNumber(next);
+                      if (_tripLimit.text != text) {
+                        _tripLimit.text = text;
+                      }
+                    },
                     validator: (value) => AppValidators.positiveNumber(
                       value,
                       context.tr('validation.positive'),
                     ),
                   ),
                   AppTextField(
-                    label: context.tr('trucks.volume'),
-                    controller: _volume,
+                    label: context.tr('trucks.tripLoadLimit'),
+                    controller: _tripLimit,
+                    required: true,
+                    hint: context.tr('trucks.tripLoadLimitHint'),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (value) => AppValidators.optionalPositiveNumber(
-                      value,
-                      context.tr('validation.positive'),
-                    ),
+                    onChanged: (_) => _tripLimitTouched = true,
+                    validator: (value) {
+                      final positive = AppValidators.positiveNumber(
+                        value,
+                        context.tr('validation.positive'),
+                      );
+                      if (positive != null) {
+                        return positive;
+                      }
+                      final limit = double.tryParse(value?.trim() ?? '');
+                      final capacity = double.tryParse(_capacity.text.trim());
+                      if (limit != null &&
+                          capacity != null &&
+                          limit > capacity + 0.0001) {
+                        return context.tr('trucks.tripLoadLimitAboveCapacity');
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  label: context.tr('trucks.volume'),
+                  controller: _volume,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) => AppValidators.optionalPositiveNumber(
+                    value,
+                    context.tr('validation.positive'),
                   ),
                 ),
                 const SizedBox(height: 12),

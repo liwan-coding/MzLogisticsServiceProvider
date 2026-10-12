@@ -203,7 +203,7 @@ class FleetScreen extends ConsumerWidget {
                                   label: truck.typeLabel,
                                 ),
                                 if (truck.capacityTons != null)
-                                  '${Formatters.number(truck.capacityTons, locale: locale)} ${context.tr('common.tons')}',
+                                  '${Formatters.number(truck.tripLoadTons, locale: locale)} ${context.tr('common.tons')}',
                                 if (truck.assignedDriver?.name != null)
                                   truck.assignedDriver!.name!,
                               ].join(' · '),
