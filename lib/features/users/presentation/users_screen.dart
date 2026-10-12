@@ -779,18 +779,31 @@ class _UserRoster extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: EntityCard(
                   title: user.name?.trim().isNotEmpty == true ? user.name! : (user.email ?? '—'),
-                  subtitle: user.email,
                   icon: Icons.person_outline_rounded,
                   tone: user.isActive ? IconTone.teal : IconTone.muted,
-                  meta: [
-                    [
-                      _userTypeLabel(context, user.userType),
-                      if (user.roles.isNotEmpty)
-                        user.roles.map((role) => _roleTitleForName(context, roles, role)).join(' · '),
-                    ].join(' · '),
-                    '${context.tr('users.lastLogin')}: ${Formatters.dateTime(user.lastLoginAt, locale: locale)}',
-                  ],
                   trailing: StatusBadge(status: user.isActive ? 'active' : 'inactive'),
+                  facts: [
+                    EntityFact(
+                      icon: Icons.mail_outline,
+                      label: context.tr('auth.email'),
+                      value: user.email ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.badge_outlined,
+                      label: context.tr('common.type'),
+                      value: _userTypeLabel(context, user.userType),
+                    ),
+                    EntityFact(
+                      icon: Icons.shield_outlined,
+                      label: context.tr('users.roles'),
+                      value: user.roles.map((role) => _roleTitleForName(context, roles, role)).join(' · '),
+                    ),
+                    EntityFact(
+                      icon: Icons.schedule_outlined,
+                      label: context.tr('users.lastLogin'),
+                      value: Formatters.dateTime(user.lastLoginAt, locale: locale),
+                    ),
+                  ],
                 ),
               ),
         ],

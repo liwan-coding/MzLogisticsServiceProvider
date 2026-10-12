@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/providers/session_provider.dart';
+import '../../../core/theme/page_visuals.dart';
 import '../../../shared/widgets/app_page.dart';
+import '../../../shared/widgets/entity_card.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../../shared/widgets/filter_bar.dart';
@@ -66,35 +67,30 @@ class NotificationsScreen extends ConsumerWidget {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (final item in data.items)
-                    Card(
-                      child: ListTile(
-                        title: Text(
-                          item.title ?? context.tr('notifications.title'),
+                  for (var index = 0; index < data.items.length; index++) ...[
+                    if (index > 0) const SizedBox(height: 10),
+                    EntityCard(
+                      title: data.items[index].title ?? context.tr('notifications.title'),
+                      subtitle: data.items[index].body,
+                      icon: data.items[index].isUnread
+                          ? Icons.notifications_active_rounded
+                          : Icons.notifications_outlined,
+                      tone: data.items[index].isUnread ? IconTone.coral : IconTone.muted,
+                      facts: [
+                        EntityFact(
+                          icon: Icons.schedule_outlined,
+                          label: context.tr('common.createdAt'),
+                          value: Formatters.dateTime(data.items[index].createdAt, locale: locale),
                         ),
-                        subtitle: Text(
-                          '${item.body ?? ''}\n${Formatters.dateTime(item.createdAt, locale: locale)}',
-                        ),
-                        isThreeLine: true,
-                        leading: Icon(
-                          item.isUnread
-                              ? Icons.notifications_active_rounded
-                              : Icons.notifications_outlined,
-                          size: 22,
-                          color: item.isUnread
-                              ? AppColors.coral
-                              : AppColors.muted,
-                        ),
-                        onTap: item.isUnread
-                            ? () async {
-                                await ref
-                                    .read(notificationRepositoryProvider)
-                                    .markRead(item.id);
-                                ref.invalidate(notificationsProvider);
-                              }
-                            : null,
-                      ),
+                      ],
+                      onTap: data.items[index].isUnread
+                          ? () async {
+                              await ref.read(notificationRepositoryProvider).markRead(data.items[index].id);
+                              ref.invalidate(notificationsProvider);
+                            }
+                          : null,
                     ),
+                  ],
                 ],
               );
             },

@@ -39,7 +39,7 @@ class PageHeader extends StatelessWidget {
     final visual = PageVisuals.of(path);
     final resolvedIcon = icon ?? visual.icon;
     final resolvedTone = tone ?? visual.tone;
-    final compact = MediaQuery.sizeOf(context).width < 400;
+    final compact = MediaQuery.sizeOf(context).width < Breakpoints.phone;
 
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w600,

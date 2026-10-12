@@ -84,9 +84,17 @@ class ProjectsScreen extends ConsumerWidget {
                   title: item.label(locale),
                   icon: Icons.folder_outlined,
                   tone: IconTone.info,
-                  subtitle: item.projectId,
-                  meta: [
-                    '${item.jobsCount} ${context.tr('projects.jobsCount')}',
+                  facts: [
+                    EntityFact(
+                      icon: Icons.tag_outlined,
+                      label: context.tr('projects.projectId'),
+                      value: item.projectId,
+                    ),
+                    EntityFact(
+                      icon: Icons.work_outline_rounded,
+                      label: context.tr('projects.jobsCount'),
+                      value: '${item.jobsCount}',
+                    ),
                   ],
                   onTap: () => context.go('/projects/${item.id}'),
                 ),

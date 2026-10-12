@@ -443,7 +443,7 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _typeDropdown(context),
+                _typeDropdown(context, shipment),
                 const SizedBox(height: 8),
                 _FleetHint(
                   plan: plan,
@@ -617,13 +617,22 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
     );
   }
 
-  Widget _typeDropdown(BuildContext context) {
+  Widget _typeDropdown(BuildContext context, Shipment shipment) {
     final catalog = ref.watch(catalogTruckTypesProvider);
     return catalog.when(
       loading: () => const LinearProgressIndicator(),
       error: (_, _) => Text(context.tr('common.error')),
       data: (types) {
-        final value = types.any((item) => item.code == _truckType) ? _truckType : types.firstOrNull?.code;
+        final requested = shipment.truckType;
+        final hasRequested = requested != null && requested.isNotEmpty;
+        final hasCurrent = _truckType != null &&
+            _truckType!.isNotEmpty &&
+            (types.any((item) => item.code == _truckType) || _truckType == requested);
+        final value = hasCurrent
+            ? _truckType
+            : hasRequested
+                ? requested
+                : types.firstOrNull?.code;
         if (value != null && value != _truckType) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -636,6 +645,11 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
           value: value,
           required: true,
           items: [
+            if (hasRequested && types.every((item) => item.code != requested))
+              DropdownMenuItem(
+                value: requested,
+                child: Text(shipment.truckTypeLabel ?? requested),
+              ),
             for (final type in types)
               DropdownMenuItem(value: type.code, child: Text(type.displayName(context.l10n.isRtl))),
           ],

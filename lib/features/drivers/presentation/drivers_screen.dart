@@ -158,10 +158,27 @@ class DriversScreen extends ConsumerWidget {
                   icon: Icons.badge_outlined,
                   tone: IconTone.success,
                   trailing: StatusBadge(status: item.displayStatus),
-                  meta: [
-                    item.phone ?? '',
-                    item.email ?? '',
-                    item.driverProfile?.licenseNumber ?? '',
+                  facts: [
+                    EntityFact(
+                      icon: Icons.phone_outlined,
+                      label: context.tr('common.phone'),
+                      value: item.phone ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.mail_outline,
+                      label: context.tr('auth.email'),
+                      value: item.email ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.badge_outlined,
+                      label: context.tr('drivers.license'),
+                      value: item.driverProfile?.licenseNumber ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.event_outlined,
+                      label: context.tr('drivers.licenseExpiry'),
+                      value: Formatters.date(item.driverProfile?.licenseExpiresAt, locale: locale),
+                    ),
                   ],
                   onTap: () => _showDriverDetails(
                     context,

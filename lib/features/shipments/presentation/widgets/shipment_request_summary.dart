@@ -26,6 +26,11 @@ class ShipmentRequestSummary extends StatelessWidget {
     final notes = shipment.notes?.trim();
     final metrics = <_SummaryMetric>[
       _SummaryMetric(context.tr('common.type'), shipment.cargoType ?? '—'),
+      if ((shipment.truckTypeLabel ?? shipment.truckType)?.isNotEmpty ?? false)
+        _SummaryMetric(
+          context.tr('shipments.vehicleType'),
+          shipment.truckTypeLabel ?? shipment.truckType ?? '—',
+        ),
       _SummaryMetric(
         context.tr('shipments.weight'),
         '${Formatters.number(shipment.weightTons, locale: locale)} ${context.tr('common.tons')}',

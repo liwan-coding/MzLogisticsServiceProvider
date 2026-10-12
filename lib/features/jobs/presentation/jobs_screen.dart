@@ -136,15 +136,31 @@ class JobsScreen extends ConsumerWidget {
                   icon: Icons.work_outline_rounded,
                   tone: IconTone.warning,
                   trailing: StatusBadge(status: item.status),
-                  subtitle: item.shipment?.reference,
-                  meta: [
-                    item.shipment?.reference ?? '',
-                    Formatters.money(
-                      item.totalPrice,
-                      currency: item.currency,
-                      locale: locale,
+                  facts: [
+                    EntityFact(
+                      icon: Icons.local_shipping_outlined,
+                      label: context.tr('nav.shipments'),
+                      value: item.shipment?.reference ?? '',
                     ),
-                    '${item.trips.length} ${context.tr('common.trips')} · ${Formatters.percent(item.progressPercent)}',
+                    EntityFact(
+                      icon: Icons.payments_outlined,
+                      label: context.tr('quotations.totalPrice'),
+                      value: Formatters.money(
+                        item.totalPrice,
+                        currency: item.currency,
+                        locale: locale,
+                      ),
+                    ),
+                    EntityFact(
+                      icon: Icons.route_outlined,
+                      label: context.tr('nav.trips'),
+                      value: '${item.trips.length}',
+                    ),
+                    EntityFact(
+                      icon: Icons.donut_large_outlined,
+                      label: context.tr('jobs.progress'),
+                      value: Formatters.percent(item.progressPercent),
+                    ),
                   ],
                   onTap: () => context.go('/jobs/${item.id}'),
                 ),

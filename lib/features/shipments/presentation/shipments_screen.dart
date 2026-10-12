@@ -8,6 +8,7 @@ import '../../../core/utils/directional_text.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/shipment.dart';
 import '../../../shared/providers/session_provider.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/page_visuals.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
@@ -131,18 +132,39 @@ class ShipmentsScreen extends ConsumerWidget {
                   ),
                   Text(Formatters.date(item.requiredDate, locale: locale)),
                   StatusBadge(status: item.status),
-                  _quoteAction(context, session, item, orgId),
+                  _quoteAction(context, session, item, orgId) ?? const SizedBox.shrink(),
                 ],
                 cardBuilder: (item) => EntityCard(
                   title: item.reference ?? '',
                   icon: Icons.local_shipping_outlined,
                   tone: IconTone.teal,
                   trailing: StatusBadge(status: item.status),
-                  subtitle: item.cargoType,
-                  meta: [
-                    directionalRouteOf(context, item.pickupCity, item.deliveryCity),
-                    '${item.cargoType ?? ''} · ${Formatters.number(item.quantity, locale: locale)} ${item.quantityUnit ?? ''} · ${Formatters.number(item.weightTons, locale: locale)} ${context.tr('common.tons')}',
-                    Formatters.date(item.requiredDate, locale: locale),
+                  facts: [
+                    EntityFact(
+                      icon: Icons.inventory_2_outlined,
+                      label: context.tr('shipments.cargo'),
+                      value: item.cargoType ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.alt_route,
+                      label: context.tr('shipments.route'),
+                      value: routeLabelOf(context, item.pickupCity, item.deliveryCity) ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.numbers_outlined,
+                      label: context.tr('common.quantity'),
+                      value: '${Formatters.number(item.quantity, locale: locale)} ${item.quantityUnit ?? ''}'.trim(),
+                    ),
+                    EntityFact(
+                      icon: Icons.scale_outlined,
+                      label: context.tr('shipments.weight'),
+                      value: '${Formatters.number(item.weightTons, locale: locale)} ${context.tr('common.tons')}',
+                    ),
+                    EntityFact(
+                      icon: Icons.event_outlined,
+                      label: context.tr('common.requiredDate'),
+                      value: Formatters.date(item.requiredDate, locale: locale),
+                    ),
                   ],
                   footer: _quoteAction(context, session, item, orgId),
                   onTap: () => context.go('/shipments/${item.id}'),
@@ -162,24 +184,39 @@ class ShipmentsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _quoteAction(
+  Widget? _quoteAction(
     BuildContext context,
     SessionState session,
     Shipment item,
     int? orgId,
   ) {
     if (!session.permissions.can(AppPermissions.quotationsCreate)) {
-      return const SizedBox.shrink();
+      return null;
     }
     if (item.quotedBy(orgId)) {
-      return Text(
-        context.tr('shipments.alreadyQuoted'),
-        style: Theme.of(context).textTheme.bodySmall,
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                context.tr('shipments.alreadyQuoted'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
       );
     }
-    return TextButton(
-      onPressed: () => context.go('/shipments/${item.id}/quote'),
-      child: Text(context.tr('shipments.quote')),
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton.icon(
+        onPressed: () => context.go('/shipments/${item.id}/quote'),
+        icon: const Icon(Icons.request_quote_outlined, size: 18),
+        label: Text(context.tr('shipments.quote')),
+      ),
     );
   }
 }

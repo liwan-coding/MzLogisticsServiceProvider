@@ -138,17 +138,45 @@ class QuotationsScreen extends ConsumerWidget {
                   icon: Icons.request_quote_outlined,
                   tone: IconTone.info,
                   trailing: StatusBadge(status: item.status),
-                  subtitle: item.shipment?.reference ?? '',
-                  meta: [
-                    Formatters.money(
-                      item.totalPrice,
-                      currency: item.currency,
-                      locale: locale,
+                  facts: [
+                    EntityFact(
+                      icon: Icons.local_shipping_outlined,
+                      label: context.tr('nav.shipments'),
+                      value: item.shipment?.reference ?? '',
                     ),
-                    '${item.truckCount ?? 0} ${context.tr('common.trucks')} · ${item.tripCount ?? 0} ${context.tr('common.trips')}',
-                    Formatters.date(item.validUntil, locale: locale),
+                    EntityFact(
+                      icon: Icons.payments_outlined,
+                      label: context.tr('quotations.totalPrice'),
+                      value: Formatters.money(
+                        item.totalPrice,
+                        currency: item.currency,
+                        locale: locale,
+                      ),
+                    ),
+                    EntityFact(
+                      icon: Icons.category_outlined,
+                      label: context.tr('quotations.truckType'),
+                      value: context.l10n.truckType(item.truckType, label: item.truckTypeLabel),
+                    ),
+                    EntityFact(
+                      icon: Icons.fire_truck_outlined,
+                      label: context.tr('quotations.truckCount'),
+                      value: '${item.truckCount ?? 0}',
+                    ),
+                    EntityFact(
+                      icon: Icons.route_outlined,
+                      label: context.tr('quotations.tripCount'),
+                      value: '${item.tripCount ?? 0}',
+                    ),
+                    EntityFact(
+                      icon: Icons.event_outlined,
+                      label: context.tr('quotations.validUntil'),
+                      value: Formatters.date(item.validUntil, locale: locale),
+                    ),
                   ],
-                  footer: _WithdrawButton(quotation: item),
+                  footer: session.permissions.can(AppPermissions.quotationsManage) && item.canWithdraw
+                      ? _WithdrawButton(quotation: item)
+                      : null,
                   onTap: () => context.go('/quotations/${item.id}'),
                 ),
                 pagination: TablePagination(
@@ -181,7 +209,7 @@ class _WithdrawButton extends ConsumerWidget {
     if (!can || !quotation.canWithdraw) {
       return const SizedBox.shrink();
     }
-    return TextButton(
+    return TextButton.icon(
       onPressed: () async {
         final ok = await showConfirmDialog(
           context,
@@ -199,7 +227,8 @@ class _WithdrawButton extends ConsumerWidget {
           }
         }
       },
-      child: Text(context.tr('common.withdraw')),
+      icon: const Icon(Icons.undo, size: 18),
+      label: Text(context.tr('common.withdraw')),
     );
   }
 }

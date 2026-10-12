@@ -11,7 +11,9 @@ import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/async_body.dart';
+import '../../../core/theme/page_visuals.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/entity_card.dart';
 import '../../../shared/widgets/filter_bar.dart';
 import '../../../shared/widgets/page_header.dart';
 import '../../../shared/widgets/responsive_data_view.dart';
@@ -160,19 +162,26 @@ class TruckTypesScreen extends ConsumerWidget {
                 },
                 cardBuilder: (item) {
                   final arabic = context.l10n.isRtl;
-                  return Card(
-                    child: ListTile(
-                      title: Text(item.displayName(arabic)),
-                      subtitle: Text(
-                        '${item.code} · ${item.isPlatform ? context.tr('truckTypes.platform') : context.tr('truckTypes.company')}',
+                  return EntityCard(
+                    title: item.displayName(arabic),
+                    icon: Icons.category_outlined,
+                    tone: item.isActive ? IconTone.teal : IconTone.muted,
+                    trailing: StatusBadge(status: item.isActive ? 'active' : 'inactive'),
+                    facts: [
+                      EntityFact(
+                        icon: Icons.tag_outlined,
+                        label: context.tr('truckTypes.code'),
+                        value: item.code,
                       ),
-                      trailing: StatusBadge(
-                        status: item.isActive ? 'active' : 'inactive',
+                      EntityFact(
+                        icon: Icons.apartment_outlined,
+                        label: context.tr('truckTypes.source'),
+                        value: item.isPlatform
+                            ? context.tr('truckTypes.platform')
+                            : context.tr('truckTypes.company'),
                       ),
-                      onTap: item.canManage
-                          ? () => _openForm(context, ref, item: item)
-                          : null,
-                    ),
+                    ],
+                    onTap: item.canManage ? () => _openForm(context, ref, item: item) : null,
                   );
                 },
               );

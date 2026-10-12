@@ -180,15 +180,35 @@ class TrucksScreen extends ConsumerWidget {
                   icon: Icons.fire_truck_outlined,
                   tone: IconTone.teal,
                   trailing: StatusBadge(status: item.status),
-                  meta: [
-                    context.l10n.truckType(item.type, label: item.typeLabel),
-                    [item.make, item.model]
-                        .where((value) => value != null && value.isNotEmpty)
-                        .join(' '),
-                    '${Formatters.number(item.capacityTons, locale: locale)} ${context.tr('common.tons')}',
+                  facts: [
+                    EntityFact(
+                      icon: Icons.category_outlined,
+                      label: context.tr('common.type'),
+                      value: context.l10n.truckType(item.type, label: item.typeLabel),
+                    ),
+                    EntityFact(
+                      icon: Icons.precision_manufacturing_outlined,
+                      label: context.tr('trucks.make'),
+                      value: [item.make, item.model]
+                          .where((value) => value != null && value.isNotEmpty)
+                          .join(' '),
+                    ),
+                    EntityFact(
+                      icon: Icons.scale_outlined,
+                      label: context.tr('common.capacity'),
+                      value: '${Formatters.number(item.capacityTons, locale: locale)} ${context.tr('common.tons')}',
+                    ),
                     if (item.volumeCbm != null)
-                      '${Formatters.number(item.volumeCbm, locale: locale)} ${context.tr('common.cbm')}',
-                    item.assignedDriver?.name ?? '',
+                      EntityFact(
+                        icon: Icons.view_in_ar_outlined,
+                        label: context.tr('shipments.volume'),
+                        value: '${Formatters.number(item.volumeCbm, locale: locale)} ${context.tr('common.cbm')}',
+                      ),
+                    EntityFact(
+                      icon: Icons.person_outline,
+                      label: context.tr('common.driver'),
+                      value: item.assignedDriver?.name ?? '',
+                    ),
                   ],
                   onTap: () => _showTruckDetails(
                     context,

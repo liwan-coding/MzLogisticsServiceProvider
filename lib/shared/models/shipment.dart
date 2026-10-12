@@ -7,6 +7,8 @@ class Shipment {
     required this.id,
     this.reference,
     this.cargoType,
+    this.truckType,
+    this.truckTypeLabel,
     this.cargoDescription,
     this.weightTons,
     this.volumeCbm,
@@ -37,6 +39,8 @@ class Shipment {
   final int id;
   final String? reference;
   final String? cargoType;
+  final String? truckType;
+  final String? truckTypeLabel;
   final String? cargoDescription;
   final double? weightTons;
   final double? volumeCbm;
@@ -77,6 +81,8 @@ class Shipment {
       id: asInt(json['id']) ?? 0,
       reference: asString(json['reference']),
       cargoType: asString(json['cargo_type']),
+      truckType: asString(json['truck_type']),
+      truckTypeLabel: asString(json['truck_type_label']),
       cargoDescription: asString(json['cargo_description']),
       weightTons: asDouble(json['weight_tons']),
       volumeCbm: asDouble(json['volume_cbm']),

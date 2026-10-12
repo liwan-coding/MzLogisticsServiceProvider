@@ -157,16 +157,26 @@ class JobDetailScreen extends ConsumerWidget {
                                 icon: Icons.route_outlined,
                                 tone: IconTone.success,
                                 trailing: StatusBadge(status: job.trips[i].status),
-                                subtitle: [
-                                  '${context.tr('trips.sequence')} ${job.trips[i].sequence ?? ''}',
-                                  if (job.trips[i].scheduledDepartureAt != null)
-                                    Formatters.dateTime(job.trips[i].scheduledDepartureAt, locale: locale),
-                                ].join(' · '),
-                                meta: [
-                                  directionalRouteOf(
-                                    context,
-                                    job.trips[i].pickupCity,
-                                    job.trips[i].deliveryCity,
+                                facts: [
+                                  EntityFact(
+                                    icon: Icons.format_list_numbered,
+                                    label: context.tr('trips.sequence'),
+                                    value: '${job.trips[i].sequence ?? ''}',
+                                  ),
+                                  EntityFact(
+                                    icon: Icons.schedule_outlined,
+                                    label: context.tr('trips.scheduledDeparture'),
+                                    value: Formatters.dateTime(job.trips[i].scheduledDepartureAt, locale: locale),
+                                  ),
+                                  EntityFact(
+                                    icon: Icons.alt_route,
+                                    label: context.tr('shipments.route'),
+                                    value: routeLabelOf(
+                                          context,
+                                          job.trips[i].pickupCity,
+                                          job.trips[i].deliveryCity,
+                                        ) ??
+                                        '',
                                   ),
                                 ],
                                 onTap: () => context.go('/trips/${job.trips[i].id}'),

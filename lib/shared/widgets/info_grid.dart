@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/breakpoints.dart';
 import '../../core/theme/page_visuals.dart';
 import 'icon_well.dart';
 
@@ -124,11 +125,17 @@ class DetailBackLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!Breakpoints.isDesktop(context)) {
+      return const SizedBox.shrink();
+    }
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: TextButton.icon(
         onPressed: () => context.go(path),
-        icon: const Icon(Icons.arrow_back, size: 18),
+        icon: Icon(
+          Directionality.of(context) == TextDirection.rtl ? Icons.arrow_forward : Icons.arrow_back,
+          size: 18,
+        ),
         label: Text(label),
       ),
     );

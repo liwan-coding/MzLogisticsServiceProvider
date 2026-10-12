@@ -59,8 +59,8 @@ class ResponsiveDataView<T> extends StatelessWidget {
                 const SizedBox(height: 10),
               ],
               if (pagination != null) ...[
-                const SizedBox(height: 2),
-                _PaginationShell(child: PaginationBar(pagination: pagination!)),
+                const SizedBox(height: 6),
+                PaginationBar(pagination: pagination!),
               ],
             ],
           );
@@ -296,97 +296,122 @@ class PaginationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
-    String number(int value) =>
-        Formatters.number(value, locale: locale, decimals: 0);
-    final summary = context.tr('common.pagination', {
-      'total': number(pagination.total),
-      'current': number(pagination.currentPage),
-      'last': number(pagination.lastPage),
-    });
-
-    final previous = _PageButton(
-      label: context.tr('common.previous'),
-      onPressed: pagination.currentPage > 1
-          ? () => pagination.onPage(pagination.currentPage - 1)
-          : null,
+    String number(int value) => Formatters.number(value, locale: locale, decimals: 0);
+    final count = context.tr('common.resultCount', {'total': number(pagination.total)});
+    final hasPages = pagination.lastPage > 1;
+    final pageLabel = '${number(pagination.currentPage)} / ${number(pagination.lastPage)}';
+    final countText = Text(
+      count,
+      style: const TextStyle(fontSize: 13, color: AppColors.muted, height: 1.3),
     );
-    final next = _PageButton(
-      label: context.tr('common.next'),
-      onPressed: pagination.currentPage < pagination.lastPage
-          ? () => pagination.onPage(pagination.currentPage + 1)
-          : null,
-    );
+    final controls = hasPages
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PageIconButton(
+                tooltip: context.tr('common.previous'),
+                forward: false,
+                onPressed: pagination.currentPage > 1
+                    ? () => pagination.onPage(pagination.currentPage - 1)
+                    : null,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  pageLabel,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+              _PageIconButton(
+                tooltip: context.tr('common.next'),
+                forward: true,
+                onPressed: pagination.currentPage < pagination.lastPage
+                    ? () => pagination.onPage(pagination.currentPage + 1)
+                    : null,
+              ),
+            ],
+          )
+        : null;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: embedded
-            ? const Border(top: BorderSide(color: AppColors.border))
-            : null,
+        border: embedded ? const Border(top: BorderSide(color: AppColors.border)) : null,
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final summaryText = Text(
-              summary,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.muted,
-                height: 1.4,
-              ),
-            );
-            if (constraints.maxWidth < 640) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  summaryText,
-                  const SizedBox(height: 10),
-                  Row(
+        padding: EdgeInsets.symmetric(horizontal: embedded ? 8 : 0, vertical: embedded ? 2 : 0),
+        child: controls == null
+            ? Align(
+                alignment: embedded ? AlignmentDirectional.centerStart : Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  child: countText,
+                ),
+              )
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  if (!embedded && constraints.maxWidth < 640) {
+                    return Column(
+                      children: [
+                        controls,
+                        countText,
+                      ],
+                    );
+                  }
+                  return Row(
                     children: [
-                      Expanded(child: previous),
-                      const SizedBox(width: 8),
-                      Expanded(child: next),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 8),
+                          child: countText,
+                        ),
+                      ),
+                      controls,
                     ],
-                  ),
-                ],
-              );
-            }
-            return Row(
-              children: [
-                Expanded(child: summaryText),
-                const SizedBox(width: 12),
-                previous,
-                const SizedBox(width: 8),
-                next,
-              ],
-            );
-          },
-        ),
+                  );
+                },
+              ),
       ),
     );
   }
 }
 
-class _PageButton extends StatelessWidget {
-  const _PageButton({required this.label, required this.onPressed});
+IconData _pageIcon(BuildContext context, {required bool forward}) {
+  final rtl = Directionality.of(context) == TextDirection.rtl;
+  if (forward) {
+    return rtl ? Icons.arrow_back : Icons.arrow_forward;
+  }
+  return rtl ? Icons.arrow_forward : Icons.arrow_back;
+}
 
-  final String label;
+class _PageIconButton extends StatelessWidget {
+  const _PageIconButton({
+    required this.tooltip,
+    required this.forward,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final bool forward;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return IconButton(
+      tooltip: tooltip,
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.ink,
-        backgroundColor: AppColors.white,
-        disabledForegroundColor: AppColors.muted,
-        side: const BorderSide(color: AppColors.border),
-        minimumSize: const Size(44, 42),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      icon: Icon(_pageIcon(context, forward: forward), size: 20),
+      style: IconButton.styleFrom(
+        foregroundColor: AppColors.teal800,
+        disabledForegroundColor: AppColors.muted.withValues(alpha: 0.35),
+        minimumSize: const Size(44, 44),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label),
     );
   }
 }

@@ -85,9 +85,12 @@ class _ButtonIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glyph = Icon(icon, size: 18);
-    final mirrorOutward =
-        icon == Icons.arrow_outward_rounded && Directionality.of(context) == TextDirection.rtl;
-    if (!mirrorOutward) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final mirror = rtl &&
+        (icon == Icons.arrow_back ||
+            icon == Icons.arrow_forward ||
+            icon == Icons.arrow_outward_rounded);
+    if (!mirror) {
       return glyph;
     }
     return Transform.flip(flipX: true, child: glyph);

@@ -196,18 +196,32 @@ class TripsScreen extends ConsumerWidget {
                   icon: Icons.route_outlined,
                   tone: IconTone.success,
                   trailing: StatusBadge(status: item.status),
-                  subtitle: item.job?.reference,
-                  meta: [
-                    if (item.scheduledDepartureAt != null)
-                      Formatters.dateTime(item.scheduledDepartureAt, locale: locale),
-                    directionalRouteOf(context, item.pickupCity, item.deliveryCity),
-                    [item.truck?.plateNumber, item.driver?.name]
-                        .where(
-                          (value) =>
-                              value != null &&
-                              value.toString().trim().isNotEmpty,
-                        )
-                        .join(' · '),
+                  facts: [
+                    EntityFact(
+                      icon: Icons.work_outline_rounded,
+                      label: context.tr('common.job'),
+                      value: item.job?.reference ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.alt_route,
+                      label: context.tr('shipments.route'),
+                      value: routeLabelOf(context, item.pickupCity, item.deliveryCity) ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.fire_truck_outlined,
+                      label: context.tr('common.truck'),
+                      value: item.truck?.plateNumber ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.person_outline,
+                      label: context.tr('common.driver'),
+                      value: item.driver?.name ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.schedule_outlined,
+                      label: context.tr('trips.scheduledDeparture'),
+                      value: Formatters.dateTime(item.scheduledDepartureAt, locale: locale),
+                    ),
                   ],
                   onTap: () => context.go('/trips/${item.id}'),
                 ),

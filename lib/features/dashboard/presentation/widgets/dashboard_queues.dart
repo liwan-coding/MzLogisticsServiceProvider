@@ -109,6 +109,7 @@ class _ShipmentQueue extends ConsumerWidget {
         return data.items.take(5).map((item) {
           return _QueueRowData(
             title: _reference(item.reference),
+            icon: Icons.local_shipping_outlined,
             meta: _queueMeta(
               context,
               null,
@@ -148,6 +149,7 @@ class _JobQueue extends ConsumerWidget {
             .map((job) {
               return _QueueRowData(
                 title: _reference(job.reference),
+                icon: Icons.work_outline_rounded,
                 meta: _queueMeta(
                   context,
                   null,
@@ -181,6 +183,7 @@ class _TripQueue extends ConsumerWidget {
         return data.items.take(5).map((trip) {
           return _QueueRowData(
             title: _reference(trip.reference),
+            icon: Icons.route_outlined,
             meta: _queueMeta(
               context,
               trip.driver?.name,
@@ -199,12 +202,14 @@ class _TripQueue extends ConsumerWidget {
 class _QueueRowData {
   const _QueueRowData({
     required this.title,
+    required this.icon,
     required this.meta,
     required this.status,
     required this.onTap,
   });
 
   final String title;
+  final IconData icon;
   final String meta;
   final String? status;
   final VoidCallback onTap;
@@ -366,6 +371,10 @@ class _QueueRow extends StatelessWidget {
           padding: const EdgeInsetsDirectional.fromSTEB(4, 10, 8, 10),
           child: Row(
             children: [
+              if (MediaQuery.sizeOf(context).width < 760) ...[
+                Icon(row.icon, size: 18, color: AppColors.teal800),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

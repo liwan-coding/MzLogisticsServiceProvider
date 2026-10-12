@@ -20,6 +20,7 @@ class NavDestination {
     required this.labelKey,
     required this.icon,
     required this.selectedIcon,
+    this.shortLabelKey,
     this.section = NavSection.operations,
     this.permission,
     this.anyPermissions,
@@ -27,6 +28,7 @@ class NavDestination {
 
   final String path;
   final String labelKey;
+  final String? shortLabelKey;
   final IconData icon;
   final IconData selectedIcon;
   final NavSection section;
@@ -38,6 +40,7 @@ const sidebarDestinations = <NavDestination>[
   NavDestination(
     path: '/dashboard',
     labelKey: 'nav.dashboard',
+    shortLabelKey: 'nav.tabHome',
     icon: Icons.space_dashboard_outlined,
     selectedIcon: Icons.space_dashboard_rounded,
     permission: AppPermissions.dashboardView,
@@ -45,6 +48,7 @@ const sidebarDestinations = <NavDestination>[
   NavDestination(
     path: '/shipments',
     labelKey: 'nav.shipments',
+    shortLabelKey: 'nav.tabShipments',
     icon: Icons.local_shipping_outlined,
     selectedIcon: Icons.local_shipping_rounded,
     permission: AppPermissions.shipmentsView,
@@ -66,6 +70,7 @@ const sidebarDestinations = <NavDestination>[
   NavDestination(
     path: '/jobs',
     labelKey: 'nav.jobs',
+    shortLabelKey: 'nav.tabJobs',
     icon: Icons.work_outline_rounded,
     selectedIcon: Icons.work_rounded,
     permission: AppPermissions.jobsView,
@@ -87,6 +92,7 @@ const sidebarDestinations = <NavDestination>[
   NavDestination(
     path: '/trucks',
     labelKey: 'nav.trucks',
+    shortLabelKey: 'nav.tabTrucks',
     icon: Icons.fire_truck_outlined,
     selectedIcon: Icons.fire_truck,
     section: NavSection.fleet,
@@ -235,28 +241,41 @@ class AppShell extends ConsumerWidget {
     final currentIndex = _mobileIndex(mobileTabs, location);
     final showAppBar = size.width >= 160;
     final showAppBarActions = size.width >= 280;
+    final parent = _parentPath(location);
+    final visual = PageVisuals.of(location);
 
     return Scaffold(
       appBar: showAppBar
           ? AppBar(
-              titleSpacing: 8,
-              title: Row(
-                children: [
-                  Icon(
-                    PageVisuals.of(location).icon,
-                    size: 20,
-                    color: AppColors.teal800,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      context.tr(_titleKey(location)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              automaticallyImplyLeading: false,
+              leadingWidth: parent == null ? 56 : 48,
+              leading: parent == null
+                  ? const Center(child: BrandMark(size: 32))
+                  : IconButton(
+                      tooltip: context.tr('common.back'),
+                      onPressed: () => context.go(parent),
+                      icon: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.arrow_forward
+                            : Icons.arrow_back,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+              titleSpacing: 4,
+              title: parent == null
+                  ? null
+                  : Row(
+                      children: [
+                        IconWell(icon: visual.icon, tone: visual.tone, size: IconWellSize.sm),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.tr(_titleKey(location)),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
               actions: [
                 if (showAppBarActions) ...[
                   if (!session.isAccountRestricted)
@@ -274,29 +293,25 @@ class AppShell extends ConsumerWidget {
               ],
             )
           : null,
-      drawer: Drawer(child: _Sidebar(items: items, location: location, inDrawer: true)),
       body: ColoredBox(color: AppColors.surface, child: child),
       bottomNavigationBar: mobileTabs.length < 2
           ? null
-          : NavigationBar(
-              selectedIndex: currentIndex < 0 ? 0 : currentIndex,
-              onDestinationSelected: (index) {
-                if (index == mobileTabs.length - 1 && mobileTabs.last.path == '/more') {
-                  context.go('/more');
-                  return;
-                }
-                context.go(mobileTabs[index].path);
-              },
-              destinations: [
-                for (final item in mobileTabs)
-                  NavigationDestination(
-                    icon: Icon(item.icon),
-                    selectedIcon: Icon(item.selectedIcon),
-                    label: context.tr(item.labelKey),
-                  ),
-              ],
+          : _MobileNav(
+              tabs: mobileTabs,
+              currentIndex: currentIndex < 0 ? 0 : currentIndex,
             ),
     );
+  }
+
+  String? _parentPath(String location) {
+    final parts = Uri.parse(location).pathSegments;
+    if (parts.length < 2) {
+      return null;
+    }
+    if (parts.last == 'new' || parts.last == 'edit') {
+      return '/${parts.first}';
+    }
+    return '/${parts.sublist(0, parts.length - 1).join('/')}';
   }
 
   List<NavDestination> _mobileTabs(List<NavDestination> items) {
@@ -312,6 +327,7 @@ class AppShell extends ConsumerWidget {
       const NavDestination(
         path: '/more',
         labelKey: 'nav.more',
+        shortLabelKey: 'nav.tabMore',
         icon: Icons.apps_outlined,
         selectedIcon: Icons.apps_rounded,
         section: NavSection.account,
@@ -321,26 +337,13 @@ class AppShell extends ConsumerWidget {
   }
 
   int _mobileIndex(List<NavDestination> tabs, String location) {
-    if (location.startsWith('/projects')) {
-      return tabs.length - 1;
+    for (var index = 0; index < tabs.length - 1; index++) {
+      final path = tabs[index].path;
+      if (location == path || location.startsWith('$path/')) {
+        return index;
+      }
     }
-    if (location == '/more' ||
-        location == '/profile' ||
-        location == '/company' ||
-        location == '/users' ||
-        location == '/finance' ||
-        location == '/notifications' ||
-        location == '/quotations' ||
-        location == '/trips' ||
-        location == '/dispatch' ||
-        location == '/trucks' ||
-        location == '/truck-types' ||
-        location == '/equipment' ||
-        location == '/drivers') {
-      return tabs.length - 1;
-    }
-    final index = tabs.indexWhere((item) => location == item.path || location.startsWith('${item.path}/'));
-    return index;
+    return tabs.length - 1;
   }
 
   String _titleKey(String location) {
@@ -503,12 +506,10 @@ class _Sidebar extends ConsumerWidget {
   const _Sidebar({
     required this.items,
     required this.location,
-    this.inDrawer = false,
   });
 
   final List<NavDestination> items;
   final String location;
-  final bool inDrawer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -524,7 +525,7 @@ class _Sidebar extends ConsumerWidget {
         color: Colors.transparent,
         child: SafeArea(
           child: SizedBox(
-            width: inDrawer ? null : Breakpoints.sidebarWidth(context),
+            width: Breakpoints.sidebarWidth(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -659,6 +660,103 @@ class _SideItem extends StatelessWidget {
                     color: selected ? AppColors.white : AppColors.onSidebarMuted,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileNav extends StatelessWidget {
+  const _MobileNav({required this.tabs, required this.currentIndex});
+
+  final List<NavDestination> tabs;
+  final int currentIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              for (var index = 0; index < tabs.length; index++)
+                Expanded(
+                  child: _MobileNavButton(
+                    item: tabs[index],
+                    selected: index == currentIndex,
+                    onTap: () => context.go(tabs[index].path),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileNavButton extends StatelessWidget {
+  const _MobileNavButton({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final NavDestination item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.tr(item.shortLabelKey ?? item.labelKey);
+    final fullLabel = context.tr(item.labelKey);
+    final color = selected ? AppColors.teal800 : AppColors.muted;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: fullLabel,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.tealSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SizedBox(
+                  width: 56,
+                  height: 32,
+                  child: Icon(
+                    selected ? item.selectedIcon : item.icon,
+                    size: 22,
+                    color: color,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  height: 1.2,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: color,
                 ),
               ),
             ],

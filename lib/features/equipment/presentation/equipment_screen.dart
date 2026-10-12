@@ -175,10 +175,22 @@ class EquipmentScreen extends ConsumerWidget {
                   icon: Icons.handyman_outlined,
                   tone: IconTone.info,
                   trailing: StatusBadge(status: item.status),
-                  subtitle: item.type,
-                  meta: [
-                    '${item.quantity ?? 0}',
-                    _assignmentLabel(context, item),
+                  facts: [
+                    EntityFact(
+                      icon: Icons.category_outlined,
+                      label: context.tr('common.type'),
+                      value: item.type ?? '',
+                    ),
+                    EntityFact(
+                      icon: Icons.numbers_outlined,
+                      label: context.tr('equipment.quantity'),
+                      value: '${item.quantity ?? 0}',
+                    ),
+                    EntityFact(
+                      icon: Icons.link_outlined,
+                      label: context.tr('equipment.assignment'),
+                      value: _assignmentLabel(context, item),
+                    ),
                   ],
                   onTap: () => _showEquipmentDetails(
                     context,

@@ -105,8 +105,12 @@ class ProjectDetailScreen extends ConsumerWidget {
                           icon: Icons.work_outline_rounded,
                           tone: IconTone.warning,
                           trailing: StatusBadge(status: item.status),
-                          meta: [
-                            Formatters.percent(item.progressPercent),
+                          facts: [
+                            EntityFact(
+                              icon: Icons.donut_large_outlined,
+                              label: context.tr('jobs.progress'),
+                              value: Formatters.percent(item.progressPercent),
+                            ),
                           ],
                           onTap: () => context.go('/jobs/${item.id}'),
                         ),

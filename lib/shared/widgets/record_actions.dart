@@ -50,7 +50,7 @@ class RecordIconButton extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       style: IconButton.styleFrom(
         foregroundColor: AppColors.ink,
-        minimumSize: const Size(40, 40),
+        minimumSize: const Size(44, 44),
         padding: const EdgeInsets.all(8),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),

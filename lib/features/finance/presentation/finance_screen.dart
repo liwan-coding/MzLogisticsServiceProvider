@@ -17,6 +17,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/entity_card.dart';
 import '../../../shared/widgets/filter_bar.dart';
 import '../../../shared/widgets/page_header.dart';
 import '../../../shared/widgets/responsive_data_view.dart';
@@ -402,21 +403,33 @@ class _LedgerTab extends ConsumerWidget {
                 Text(item.paymentReference ?? '—'),
                 Text(Formatters.dateTime(item.createdAt, locale: locale)),
               ],
-              cardBuilder: (item) => Card(
-                child: ListTile(
-                  title: Text(item.reference ?? ''),
-                  subtitle: Text(
-                    [
-                      item.jobReference,
-                      Formatters.money(
-                        item.amount,
-                        currency: item.currency,
-                        locale: locale,
-                      ),
-                    ].whereType<String>().join(' · '),
+              cardBuilder: (item) => EntityCard(
+                title: item.reference ?? '',
+                icon: Icons.receipt_long_outlined,
+                tone: IconTone.success,
+                trailing: StatusBadge(status: item.type),
+                facts: [
+                  EntityFact(
+                    icon: Icons.payments_outlined,
+                    label: context.tr('finance.amount'),
+                    value: Formatters.money(item.amount, currency: item.currency, locale: locale),
                   ),
-                  trailing: StatusBadge(status: item.type),
-                ),
+                  EntityFact(
+                    icon: Icons.work_outline_rounded,
+                    label: context.tr('common.job'),
+                    value: item.jobReference ?? '',
+                  ),
+                  EntityFact(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: context.tr('finance.payments'),
+                    value: item.paymentReference ?? '',
+                  ),
+                  EntityFact(
+                    icon: Icons.schedule_outlined,
+                    label: context.tr('common.createdAt'),
+                    value: Formatters.dateTime(item.createdAt, locale: locale),
+                  ),
+                ],
               ),
               pagination: TablePagination(
                 currentPage: data.currentPage,
@@ -520,27 +533,28 @@ class _PaymentsTab extends ConsumerWidget {
                 Text(Formatters.dateTime(item.paidAt, locale: locale)),
                 StatusBadge(status: item.status),
               ],
-              cardBuilder: (item) => Card(
-                child: ListTile(
-                  title: Text(item.reference ?? ''),
-                  subtitle: Text(
-                    [
-                          Formatters.money(
-                            item.providerAmount,
-                            currency: item.currency,
-                            locale: locale,
-                          ),
-                          item.method,
-                          Formatters.dateTime(item.paidAt, locale: locale),
-                        ]
-                        .where(
-                          (value) =>
-                              value != null && value.isNotEmpty && value != '—',
-                        )
-                        .join(' · '),
+              cardBuilder: (item) => EntityCard(
+                title: item.reference ?? '',
+                icon: Icons.payments_outlined,
+                tone: IconTone.success,
+                trailing: StatusBadge(status: item.status),
+                facts: [
+                  EntityFact(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: context.tr('finance.providerAmount'),
+                    value: Formatters.money(item.providerAmount, currency: item.currency, locale: locale),
                   ),
-                  trailing: StatusBadge(status: item.status),
-                ),
+                  EntityFact(
+                    icon: Icons.credit_card_outlined,
+                    label: context.tr('finance.method'),
+                    value: item.method ?? '',
+                  ),
+                  EntityFact(
+                    icon: Icons.event_outlined,
+                    label: context.tr('finance.paidAt'),
+                    value: Formatters.dateTime(item.paidAt, locale: locale),
+                  ),
+                ],
               ),
               pagination: TablePagination(
                 currentPage: data.currentPage,
@@ -640,27 +654,33 @@ class _InvoicesTab extends ConsumerWidget {
                 Text(Formatters.date(item.dueAt, locale: locale)),
                 StatusBadge(status: item.status),
               ],
-              cardBuilder: (item) => Card(
-                child: ListTile(
-                  title: Text(item.reference ?? ''),
-                  subtitle: Text(
-                    [
-                          Formatters.money(
-                            item.amount,
-                            currency: item.currency,
-                            locale: locale,
-                          ),
-                          item.job?.reference,
-                          Formatters.date(item.dueAt, locale: locale),
-                        ]
-                        .where(
-                          (value) =>
-                              value != null && value.toString().isNotEmpty,
-                        )
-                        .join(' · '),
+              cardBuilder: (item) => EntityCard(
+                title: item.reference ?? '',
+                icon: Icons.description_outlined,
+                tone: IconTone.info,
+                trailing: StatusBadge(status: item.status),
+                facts: [
+                  EntityFact(
+                    icon: Icons.payments_outlined,
+                    label: context.tr('finance.amount'),
+                    value: Formatters.money(item.amount, currency: item.currency, locale: locale),
                   ),
-                  trailing: StatusBadge(status: item.status),
-                ),
+                  EntityFact(
+                    icon: Icons.work_outline_rounded,
+                    label: context.tr('common.job'),
+                    value: item.job?.reference ?? '',
+                  ),
+                  EntityFact(
+                    icon: Icons.event_outlined,
+                    label: context.tr('finance.issued'),
+                    value: Formatters.date(item.issuedAt, locale: locale),
+                  ),
+                  EntityFact(
+                    icon: Icons.event_busy_outlined,
+                    label: context.tr('finance.due'),
+                    value: Formatters.date(item.dueAt, locale: locale),
+                  ),
+                ],
               ),
               pagination: TablePagination(
                 currentPage: data.currentPage,
@@ -754,14 +774,33 @@ class _SettlementsTab extends ConsumerWidget {
                 Text(Formatters.dateTime(item.settledAt, locale: locale)),
                 StatusBadge(status: item.status),
               ],
-              cardBuilder: (item) => Card(
-                child: ListTile(
-                  title: Text(item.reference ?? ''),
-                  subtitle: Text(
-                    '${Formatters.money(item.netAmount, currency: item.currency, locale: locale)} · ${Formatters.date(item.periodStart, locale: locale)}',
+              cardBuilder: (item) => EntityCard(
+                title: item.reference ?? '',
+                icon: Icons.account_balance_outlined,
+                tone: IconTone.success,
+                trailing: StatusBadge(status: item.status),
+                facts: [
+                  EntityFact(
+                    icon: Icons.payments_outlined,
+                    label: context.tr('finance.amount'),
+                    value: Formatters.money(item.amount, currency: item.currency, locale: locale),
                   ),
-                  trailing: StatusBadge(status: item.status),
-                ),
+                  EntityFact(
+                    icon: Icons.savings_outlined,
+                    label: context.tr('finance.net'),
+                    value: Formatters.money(item.netAmount, currency: item.currency, locale: locale),
+                  ),
+                  EntityFact(
+                    icon: Icons.date_range_outlined,
+                    label: context.tr('finance.period'),
+                    value: '${Formatters.date(item.periodStart, locale: locale)} – ${Formatters.date(item.periodEnd, locale: locale)}',
+                  ),
+                  EntityFact(
+                    icon: Icons.event_available_outlined,
+                    label: context.tr('finance.settledAt'),
+                    value: Formatters.dateTime(item.settledAt, locale: locale),
+                  ),
+                ],
               ),
               pagination: TablePagination(
                 currentPage: data.currentPage,
