@@ -104,11 +104,25 @@ class QuotationDetailScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       InfoGrid(
                         fields: [
-                          if (item.pricePerTrip != null)
+                          if (item.pricePerTon != null)
+                            InfoField(
+                              label: context.tr('quotations.pricePerTon'),
+                              value: Formatters.money(item.pricePerTon, currency: item.currency, locale: locale),
+                              icon: Icons.scale_outlined,
+                              tone: IconTone.teal,
+                            )
+                          else if (item.pricePerTrip != null)
                             InfoField(
                               label: context.tr('quotations.pricePerTrip'),
                               value: Formatters.money(item.pricePerTrip, currency: item.currency, locale: locale),
                               icon: Icons.route_outlined,
+                              tone: IconTone.teal,
+                            ),
+                          if (_showsTransportPrice(item.transportPrice, item.totalPrice))
+                            InfoField(
+                              label: context.tr('quotations.transportPrice'),
+                              value: Formatters.money(item.transportPrice, currency: item.currency, locale: locale),
+                              icon: Icons.local_shipping_outlined,
                               tone: IconTone.teal,
                             ),
                           InfoField(
@@ -140,6 +154,9 @@ class QuotationDetailScreen extends ConsumerWidget {
                           totalPrice: item.totalPrice ?? 0,
                           tripCount: item.plannedTripRecords,
                           currency: item.currency,
+                          pricingBasis: item.pricingBasis ?? (item.pricePerTon != null ? 'ton' : item.pricePerTrip != null ? 'trip' : null),
+                          unitPrice: item.pricePerTon ?? item.pricePerTrip,
+                          weightTons: shipment.weightTons,
                         ),
                       ],
                     ],
@@ -282,4 +299,11 @@ class QuotationDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+bool _showsTransportPrice(double? transport, double? total) {
+  if (transport == null || total == null) {
+    return false;
+  }
+  return (transport - total).abs() > 0.0005;
 }

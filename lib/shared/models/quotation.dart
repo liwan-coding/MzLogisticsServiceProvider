@@ -8,7 +8,10 @@ class Quotation {
     this.reference,
     this.shipmentRequestId,
     this.totalPrice,
+    this.transportPrice,
     this.pricePerTrip,
+    this.pricePerTon,
+    this.pricingBasis,
     this.currency,
     this.truckCount,
     this.truckType,
@@ -31,7 +34,10 @@ class Quotation {
   final String? reference;
   final int? shipmentRequestId;
   final double? totalPrice;
+  final double? transportPrice;
   final double? pricePerTrip;
+  final double? pricePerTon;
+  final String? pricingBasis;
   final String? currency;
   final int? truckCount;
   final String? truckType;
@@ -89,7 +95,10 @@ class Quotation {
       reference: asString(json['reference']),
       shipmentRequestId: asInt(json['shipment_request_id']),
       totalPrice: asDouble(json['total_price']),
+      transportPrice: asDouble(json['transport_price']),
       pricePerTrip: asDouble(json['price_per_trip']),
+      pricePerTon: asDouble(json['price_per_ton']),
+      pricingBasis: asString(json['pricing_basis']),
       currency: asString(json['currency']),
       truckCount: asInt(json['truck_count']),
       truckType: asString(json['truck_type']),
@@ -112,7 +121,8 @@ class Quotation {
 
 class QuotationDraft {
   const QuotationDraft({
-    required this.pricePerTrip,
+    this.pricePerTrip,
+    this.pricePerTon,
     required this.truckCount,
     required this.truckType,
     required this.truckCapacityTons,
@@ -124,7 +134,8 @@ class QuotationDraft {
     this.conditions,
   });
 
-  final double pricePerTrip;
+  final double? pricePerTrip;
+  final double? pricePerTon;
   final int truckCount;
   final String truckType;
   final double truckCapacityTons;
@@ -137,7 +148,8 @@ class QuotationDraft {
 
   Map<String, dynamic> toJson() {
     return {
-      'price_per_trip': pricePerTrip,
+      if (pricePerTrip != null) 'price_per_trip': pricePerTrip,
+      if (pricePerTon != null) 'price_per_ton': pricePerTon,
       'truck_count': truckCount,
       'truck_type': truckType,
       'truck_capacity_tons': truckCapacityTons,

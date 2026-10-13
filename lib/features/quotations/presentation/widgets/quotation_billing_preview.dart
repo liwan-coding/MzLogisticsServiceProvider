@@ -13,12 +13,18 @@ class QuotationBillingPreview extends StatelessWidget {
     required this.totalPrice,
     required this.tripCount,
     this.currency,
+    this.pricingBasis,
+    this.unitPrice,
+    this.weightTons,
   });
 
   final Shipment shipment;
   final double totalPrice;
   final int tripCount;
   final String? currency;
+  final String? pricingBasis;
+  final double? unitPrice;
+  final double? weightTons;
 
   bool get _prepaid =>
       shipment.paymentPrepaid || shipment.paymentBillingTrigger == 'on_award';
@@ -32,6 +38,22 @@ class QuotationBillingPreview extends StatelessWidget {
     final amount = Formatters.money(totalPrice, currency: currency, locale: locale);
     final days = shipment.paymentDueDays ?? 0;
     final lines = <String>[];
+    final unit = unitPrice;
+    if (pricingBasis == 'ton' && unit != null && unit > 0 && (weightTons ?? 0) > 0) {
+      lines.add(
+        context.tr('quotations.pricedPerTon', {
+          'amount': Formatters.money(unit, currency: currency, locale: locale),
+          'weight': Formatters.number(weightTons, locale: locale),
+        }),
+      );
+    } else if (pricingBasis == 'trip' && unit != null && unit > 0) {
+      lines.add(
+        context.tr('quotations.pricedPerTrip', {
+          'amount': Formatters.money(unit, currency: currency, locale: locale),
+          'count': '$trips',
+        }),
+      );
+    }
 
     if (_prepaid) {
       lines.add(context.tr('quotations.billingPrepaid'));

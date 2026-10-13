@@ -44,6 +44,7 @@ class SubmitQuotationScreen extends ConsumerStatefulWidget {
 
 class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
   final _formKey = GlobalKey<FormState>();
+  String _pricingBasis = 'trip';
   final _price = TextEditingController();
   final _truckCount = TextEditingController(text: '1');
   final _capacity = TextEditingController();
@@ -104,10 +105,29 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
 
   double get _qtyPerTripValue => double.tryParse(_qtyPerTrip.text.trim()) ?? 0;
 
-  double _quotedTotal(int trips) {
+  double _quotedTotal(int trips, double? weightTons) {
     final unit = double.tryParse(_price.text.trim()) ?? 0;
+    if (_pricingBasis == 'ton') {
+      final weight = weightTons ?? 0;
+      if (unit <= 0 || weight <= 0) {
+        return 0;
+      }
+      return ((unit * weight) * 1000).round() / 1000;
+    }
     final count = trips < 1 ? 1 : trips;
     return ((unit * count) * 1000).round() / 1000;
+  }
+
+  double get _additionalCosts {
+    final value = double.tryParse(_extra.text.trim()) ?? 0;
+    if (value <= 0) {
+      return 0;
+    }
+    return (value * 1000).round() / 1000;
+  }
+
+  double _payableTotal(int trips, double? weightTons) {
+    return ((_quotedTotal(trips, weightTons) + _additionalCosts) * 1000).round() / 1000;
   }
 
   double get _capacityValue => double.tryParse(_capacity.text.trim()) ?? 0;
@@ -322,13 +342,18 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
       showAppSnack(context, context.tr('quotations.submitBlockedCapacity'));
       return;
     }
+    if (_pricingBasis == 'ton' && (shipment.weightTons ?? 0) <= 0) {
+      showAppSnack(context, context.tr('quotations.perTonUnavailable'));
+      return;
+    }
     _syncTripsToPlan();
     setState(() => _loading = true);
     try {
       await ref.read(quotationRepositoryProvider).submit(
             widget.shipmentId,
             QuotationDraft(
-              pricePerTrip: double.parse(_price.text),
+              pricePerTrip: _pricingBasis == 'ton' ? null : double.parse(_price.text),
+              pricePerTon: _pricingBasis == 'ton' ? double.parse(_price.text) : null,
               truckCount: int.parse(_truckCount.text),
               truckType: truckType,
               truckCapacityTons: double.parse(_capacity.text),
@@ -529,9 +554,12 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
           SectionCard(
             title: context.tr('quotations.priceSection'),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                _pricingChoice(context, shipment),
+                const SizedBox(height: 12),
                 AppTextField(
-                  label: context.tr('quotations.pricePerTrip'),
+                  label: context.tr(_pricingBasis == 'ton' ? 'quotations.pricePerTon' : 'quotations.pricePerTrip'),
                   controller: _price,
                   required: true,
                   showRequiredHint: false,
@@ -541,23 +569,62 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  context.tr('quotations.pricePerTripHint'),
+                  context.tr(_pricingBasis == 'ton' ? 'quotations.pricePerTonHint' : 'quotations.pricePerTripHint'),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.muted,
                         height: 1.45,
                       ),
                 ),
-                if ((double.tryParse(_price.text.trim()) ?? 0) > 0) ...[
+                if ((double.tryParse(_price.text.trim()) ?? 0) > 0 && _quotedTotal(plan.tripCount, shipment.weightTons) > 0) ...[
                   const SizedBox(height: 8),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
-                      context.tr('quotations.calculatedTotal', {
+                      _pricingBasis == 'ton'
+                          ? context.tr('quotations.calculatedTonTotal', {
+                              'amount': Formatters.money(
+                                _quotedTotal(plan.tripCount, shipment.weightTons),
+                                locale: Localizations.localeOf(context).languageCode,
+                              ),
+                              'weight': Formatters.number(shipment.weightTons, locale: Localizations.localeOf(context).languageCode),
+                            })
+                          : context.tr('quotations.calculatedTotal', {
+                              'amount': Formatters.money(
+                                _quotedTotal(plan.tripCount, shipment.weightTons),
+                                locale: Localizations.localeOf(context).languageCode,
+                              ),
+                              'count': '${plan.tripCount}',
+                            }),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.w600,
+                            height: 1.45,
+                          ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                AppTextField(
+                  label: context.tr('quotations.additionalCosts'),
+                  controller: _extra,
+                  showRequiredHint: false,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (_) => setState(() {}),
+                ),
+                if (_additionalCosts > 0 && _payableTotal(plan.tripCount, shipment.weightTons) > 0) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      context.tr('quotations.payableTotal', {
                         'amount': Formatters.money(
-                          _quotedTotal(plan.tripCount),
+                          _payableTotal(plan.tripCount, shipment.weightTons),
                           locale: Localizations.localeOf(context).languageCode,
                         ),
-                        'count': '${plan.tripCount}',
+                        'extra': Formatters.money(
+                          _additionalCosts,
+                          locale: Localizations.localeOf(context).languageCode,
+                        ),
                       }),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.ink,
@@ -570,15 +637,11 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
                 const SizedBox(height: 12),
                 QuotationBillingPreview(
                   shipment: shipment,
-                  totalPrice: _quotedTotal(plan.tripCount),
+                  totalPrice: _payableTotal(plan.tripCount, shipment.weightTons),
                   tripCount: plan.tripCount,
-                ),
-                const SizedBox(height: 12),
-                AppTextField(
-                  label: context.tr('quotations.additionalCosts'),
-                  controller: _extra,
-                  showRequiredHint: false,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  pricingBasis: _pricingBasis,
+                  unitPrice: double.tryParse(_price.text.trim()),
+                  weightTons: shipment.weightTons,
                 ),
                 const SizedBox(height: 12),
                 _startDateField(context, shipment),
@@ -614,6 +677,46 @@ class _SubmitQuotationScreenState extends ConsumerState<SubmitQuotationScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _pricingChoice(BuildContext context, Shipment shipment) {
+    final canPricePerTon = (shipment.weightTons ?? 0) > 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          context.tr('quotations.pricingBasis'),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: Text(context.tr('quotations.perTrip')),
+              selected: _pricingBasis == 'trip',
+              onSelected: (_) => setState(() => _pricingBasis = 'trip'),
+            ),
+            ChoiceChip(
+              label: Text(context.tr('quotations.perTon')),
+              selected: _pricingBasis == 'ton',
+              onSelected: canPricePerTon ? (_) => setState(() => _pricingBasis = 'ton') : null,
+            ),
+          ],
+        ),
+        if (!canPricePerTon) ...[
+          const SizedBox(height: 8),
+          Text(
+            context.tr('quotations.perTonUnavailable'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.muted,
+                  height: 1.45,
+                ),
+          ),
+        ],
+      ],
     );
   }
 
