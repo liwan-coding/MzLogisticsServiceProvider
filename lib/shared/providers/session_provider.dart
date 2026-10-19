@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/push/push_notifications.dart';
 import '../../core/permissions/app_permissions.dart';
 import '../../core/storage/token_storage.dart';
 import '../../features/auth/data/auth_repository.dart';
@@ -165,6 +166,7 @@ class SessionNotifier extends Notifier<SessionState> {
   }
 
   Future<void> logout() async {
+    await PushNotifications.unregister();
     await ref.read(authRepositoryProvider).logout();
     await ref.read(tokenStorageProvider).clear();
     state = const SessionState(ready: true);

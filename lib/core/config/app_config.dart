@@ -4,7 +4,7 @@ class AppConfig {
   static const String _apiBaseUrlFromEnv = String.fromEnvironment('API_BASE_URL');
 
   /// Local MoveX API. Override with `--dart-define=API_BASE_URL=...`.
-  static const String apiBaseUrlDefault = 'http://192.168.100.106:8000/api/v1';
+  static const String apiBaseUrlDefault = 'http://192.168.100.153:8000/api/v1';
 
   static String get apiBaseUrl {
     if (_apiBaseUrlFromEnv.isNotEmpty) return _apiBaseUrlFromEnv;

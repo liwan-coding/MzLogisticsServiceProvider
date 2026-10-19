@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../shared/models/app_notification.dart';
 import '../../../shared/providers/session_provider.dart';
 import '../../../core/theme/page_visuals.dart';
 import '../../../shared/widgets/app_page.dart';
@@ -70,8 +72,8 @@ class NotificationsScreen extends ConsumerWidget {
                   for (var index = 0; index < data.items.length; index++) ...[
                     if (index > 0) const SizedBox(height: 10),
                     EntityCard(
-                      title: data.items[index].title ?? context.tr('notifications.title'),
-                      subtitle: data.items[index].body,
+                      title: _title(context, data.items[index]),
+                      subtitle: _body(context, data.items[index]),
                       icon: data.items[index].isUnread
                           ? Icons.notifications_active_rounded
                           : Icons.notifications_outlined,
@@ -83,12 +85,7 @@ class NotificationsScreen extends ConsumerWidget {
                           value: Formatters.dateTime(data.items[index].createdAt, locale: locale),
                         ),
                       ],
-                      onTap: data.items[index].isUnread
-                          ? () async {
-                              await ref.read(notificationRepositoryProvider).markRead(data.items[index].id);
-                              ref.invalidate(notificationsProvider);
-                            }
-                          : null,
+                      onTap: () => _open(context, ref, data.items[index]),
                     ),
                   ],
                 ],
@@ -99,4 +96,38 @@ class NotificationsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _title(BuildContext context, AppNotification item) {
+  final text = item.textTitle(Localizations.localeOf(context).languageCode);
+  return text.isEmpty ? context.tr('notifications.title') : text;
+}
+
+String? _body(BuildContext context, AppNotification item) {
+  final text = item.textBody(Localizations.localeOf(context).languageCode);
+  return text.isEmpty ? null : text;
+}
+
+Future<void> _open(BuildContext context, WidgetRef ref, AppNotification item) async {
+  final path = _notificationPath(item);
+  if (item.isUnread) {
+    await ref.read(notificationRepositoryProvider).markRead(item.id);
+    ref.invalidate(notificationsProvider);
+  }
+  if (path != null && context.mounted) {
+    context.push(path);
+  }
+}
+
+String? _notificationPath(AppNotification item) {
+  final id = item.targetId;
+  return switch (item.targetType) {
+    'shipment' => id == null ? null : '/shipments/$id',
+    'quotation' => id == null ? null : '/quotations/$id',
+    'job' => id == null ? null : '/jobs/$id',
+    'trip' => id == null ? null : '/trips/$id',
+    'settlement' || 'invoice' || 'payment' || 'wallet' => '/finance',
+    'organization' => '/company',
+    _ => null,
+  };
 }
