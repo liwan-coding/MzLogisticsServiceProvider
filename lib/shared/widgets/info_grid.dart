@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/breakpoints.dart';
 import '../../core/theme/page_visuals.dart';
+import 'equal_grid.dart';
 import 'icon_well.dart';
 
 class InfoField {
@@ -31,28 +32,42 @@ class InfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 720
-            ? 3
-            : constraints.maxWidth >= 480
-                ? 2
-                : 1;
+    final rows = <Widget>[];
+    final buffer = <InfoField>[];
 
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final field in fields)
-              SizedBox(
-                width: field.wide || columns == 1
-                    ? constraints.maxWidth
-                    : (constraints.maxWidth - (12 * (columns - 1))) / columns,
-                child: _InfoCell(field: field),
-              ),
-          ],
-        );
-      },
+    void flush() {
+      if (buffer.isEmpty) {
+        return;
+      }
+      if (rows.isNotEmpty) {
+        rows.add(const SizedBox(height: 12));
+      }
+      rows.add(
+        EqualGrid(
+          minItemWidth: 200,
+          gap: 12,
+          children: [for (final field in buffer) _InfoCell(field: field)],
+        ),
+      );
+      buffer.clear();
+    }
+
+    for (final field in fields) {
+      if (field.wide) {
+        flush();
+        if (rows.isNotEmpty) {
+          rows.add(const SizedBox(height: 12));
+        }
+        rows.add(_InfoCell(field: field));
+      } else {
+        buffer.add(field);
+      }
+    }
+    flush();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
     );
   }
 }
@@ -70,10 +85,11 @@ class _InfoCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(minHeight: 76),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppColors.radius),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -82,16 +98,27 @@ class _InfoCell extends StatelessWidget {
           Row(
             children: [
               if (field.icon != null) ...[
-                Icon(field.icon, size: 15, color: field.tone.foreground),
+                Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: field.tone.background,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Icon(field.icon, size: 14, color: field.tone.foreground),
+                ),
                 const SizedBox(width: 6),
               ],
               Expanded(
                 child: Text(
                   field.label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.muted,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: const TextStyle(
+                    color: AppColors.muted,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    height: 1.35,
+                  ),
                 ),
               ),
             ],
@@ -99,7 +126,12 @@ class _InfoCell extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             field.value.isEmpty ? '—' : field.value,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(height: 1.35),
+            style: const TextStyle(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              height: 1.35,
+            ),
             textDirection: _isMostlyLtr(field.value) ? TextDirection.ltr : null,
           ),
         ],
@@ -111,7 +143,7 @@ class _InfoCell extends StatelessWidget {
     }
     return InkWell(
       onTap: field.onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(AppColors.radius),
       child: content,
     );
   }

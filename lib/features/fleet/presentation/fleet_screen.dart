@@ -6,12 +6,12 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/permissions/app_permissions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/page_visuals.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/providers/session_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
+import '../../../shared/widgets/equal_grid.dart';
 import '../../../shared/widgets/icon_well.dart';
 import '../../../shared/widgets/info_grid.dart';
 import '../../../shared/widgets/metric_card.dart';
@@ -48,6 +48,24 @@ class FleetScreen extends ConsumerWidget {
     final available = trucks.asData?.value.items
         .where((truck) => truck.isAvailable)
         .length;
+    final links = <_Shortcut>[
+      _Shortcut('/trucks', 'nav.trucks', Icons.fire_truck_outlined, IconTone.teal),
+      if (canDrivers)
+        _Shortcut('/drivers', 'nav.drivers', Icons.badge_outlined, IconTone.success),
+      _Shortcut(
+        '/equipment',
+        'nav.equipment',
+        Icons.handyman_outlined,
+        IconTone.info,
+      ),
+      if (session.permissions.can(AppPermissions.fleetManage))
+        _Shortcut(
+          '/truck-types',
+          'nav.truckTypes',
+          Icons.category_outlined,
+          IconTone.muted,
+        ),
+    ];
 
     return AppPage(
       child: Column(
@@ -61,116 +79,60 @@ class FleetScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           _FleetNote(text: context.tr('fleet.belongsToCompany')),
           const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = Breakpoints.metricColumns(constraints.maxWidth);
-              final gap = 12.0;
-              final itemWidth =
-                  (constraints.maxWidth - (gap * (columns - 1))) / columns;
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  SizedBox(
-                    width: itemWidth,
-                    child: MetricCard(
-                      label: context.tr('fleet.trucksSummary'),
-                      value: trucks.asData?.value.total.toString() ?? '—',
-                      icon: Icons.fire_truck_outlined,
-                      tone: IconTone.teal,
-                      hint: available == null
-                          ? null
-                          : '${context.tr('fleet.availableNow')}: $available',
-                      onTap: () => context.go('/trucks'),
-                    ),
-                  ),
-                  if (canDrivers)
-                    SizedBox(
-                      width: itemWidth,
-                      child: MetricCard(
-                        label: context.tr('fleet.driversSummary'),
-                        value: drivers.asData?.value.total.toString() ?? '—',
-                        icon: Icons.badge_outlined,
-                        tone: IconTone.success,
-                        onTap: () => context.go('/drivers'),
-                      ),
-                    ),
-                  SizedBox(
-                    width: itemWidth,
-                    child: MetricCard(
-                      label: context.tr('fleet.equipmentSummary'),
-                      value: equipment.asData?.value.total.toString() ?? '—',
-                      icon: Icons.handyman_outlined,
-                      tone: IconTone.info,
-                      onTap: () => context.go('/equipment'),
-                    ),
-                  ),
-                ],
-              );
-            },
+          EqualGrid(
+            maxColumns: 3,
+            children: [
+              MetricCard(
+                label: context.tr('fleet.trucksSummary'),
+                value: trucks.asData?.value.total.toString() ?? '—',
+                icon: Icons.fire_truck_outlined,
+                tone: IconTone.teal,
+                hint: available == null
+                    ? null
+                    : '${context.tr('fleet.availableNow')}: $available',
+                onTap: () => context.go('/trucks'),
+              ),
+              if (canDrivers)
+                MetricCard(
+                  label: context.tr('fleet.driversSummary'),
+                  value: drivers.asData?.value.total.toString() ?? '—',
+                  icon: Icons.badge_outlined,
+                  tone: IconTone.success,
+                  onTap: () => context.go('/drivers'),
+                ),
+              MetricCard(
+                label: context.tr('fleet.equipmentSummary'),
+                value: equipment.asData?.value.total.toString() ?? '—',
+                icon: Icons.handyman_outlined,
+                tone: IconTone.info,
+                onTap: () => context.go('/equipment'),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Text(
             context.tr('fleet.shortcuts'),
-            style: Theme.of(context).textTheme.titleSmall
-                ?.copyWith(color: AppColors.muted, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: AppColors.ink,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 720
-                  ? 3
-                  : constraints.maxWidth >= 420
-                  ? 2
-                  : 1;
-              final gap = 10.0;
-              final width =
-                  (constraints.maxWidth - (gap * (columns - 1))) / columns;
-              final links = <_Shortcut>[
-                _Shortcut(
-                  '/trucks',
-                  'nav.trucks',
-                  Icons.fire_truck_outlined,
-                  IconTone.teal,
+          EqualGrid(
+            minItemWidth: 200,
+            maxColumns: 3,
+            gap: 10,
+            children: [
+              for (final link in links)
+                _ShortcutCard(
+                  label: context.tr(link.labelKey),
+                  icon: link.icon,
+                  tone: link.tone,
+                  onTap: () => context.go(link.path),
                 ),
-                if (canDrivers)
-                  _Shortcut(
-                    '/drivers',
-                    'nav.drivers',
-                    Icons.badge_outlined,
-                    IconTone.success,
-                  ),
-                _Shortcut(
-                  '/equipment',
-                  'nav.equipment',
-                  Icons.handyman_outlined,
-                  IconTone.info,
-                ),
-                if (session.permissions.can(AppPermissions.fleetManage))
-                  _Shortcut(
-                    '/truck-types',
-                    'nav.truckTypes',
-                    Icons.category_outlined,
-                    IconTone.muted,
-                  ),
-              ];
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  for (final link in links)
-                    SizedBox(
-                      width: width,
-                      child: _ShortcutCard(
-                        label: context.tr(link.labelKey),
-                        icon: link.icon,
-                        tone: link.tone,
-                        onTap: () => context.go(link.path),
-                      ),
-                    ),
-                ],
-              );
-            },
+            ],
           ),
           const SizedBox(height: 16),
           ResponsiveSplit(
@@ -361,7 +323,13 @@ class _ShortcutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppColors.radius),
+        side: const BorderSide(color: AppColors.border),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -375,7 +343,9 @@ class _ShortcutCard extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
+                    fontSize: 15,
                     height: 1.35,
+                    color: AppColors.ink,
                   ),
                 ),
               ),

@@ -543,7 +543,7 @@ class _Sidebar extends ConsumerWidget {
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                             height: 1.25,
-                            letterSpacing: 0.1,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -559,12 +559,13 @@ class _Sidebar extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
                           child: Text(
-                            context.tr(navSectionLabel(group.section)).toUpperCase(),
+                            context.tr(navSectionLabel(group.section)),
                             style: const TextStyle(
                               color: AppColors.onSidebarMuted,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.6,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0,
+                              height: 1.35,
                             ),
                           ),
                         ),
@@ -647,10 +648,23 @@ class _SideItem extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                selected ? item.selectedIcon : item.icon,
-                size: 18,
-                color: selected ? AppColors.coral : AppColors.onSidebarMuted,
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? AppColors.coral.withValues(alpha: 0.22)
+                      : Colors.white.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  selected ? item.selectedIcon : item.icon,
+                  size: 18,
+                  color: selected
+                      ? const Color(0xFFFFE3A3)
+                      : PageVisuals.of(item.path).tone.onDark,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -719,7 +733,8 @@ class _MobileNavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = context.tr(item.shortLabelKey ?? item.labelKey);
     final fullLabel = context.tr(item.labelKey);
-    final color = selected ? AppColors.teal800 : AppColors.muted;
+    final tone = PageVisuals.of(item.path).tone.foreground;
+    final color = selected ? AppColors.teal800 : tone;
     return Semantics(
       button: true,
       selected: selected,
@@ -753,7 +768,7 @@ class _MobileNavButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   height: 1.2,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   color: color,

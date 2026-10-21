@@ -91,6 +91,36 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a short last row keeps the same tile width and row height', (
+    tester,
+  ) async {
+    await _pumpGrid(tester, const Size(700, 900), [
+      ...metrics,
+      _metric('Completed trips', '1'),
+    ]);
+
+    final first = _tileSize(tester, 'Open shipments');
+    final second = _tileSize(tester, 'Pending quotations');
+    final third = _tileSize(tester, 'Active jobs');
+    final leftover = _tileSize(tester, 'Completed trips');
+
+    expect(first.width, closeTo(second.width, 1));
+    expect(first.width, closeTo(third.width, 1));
+    expect(leftover.width, closeTo(first.width, 1));
+    expect(leftover.width, lessThan(400));
+    expect(first.height, closeTo(second.height, 1));
+    expect(first.height, closeTo(third.height, 1));
+    expect(tester.takeException(), isNull);
+  });
+}
+
+Size _tileSize(WidgetTester tester, String label) {
+  final tile = find.ancestor(
+    of: find.text(label),
+    matching: find.byType(Ink),
+  );
+  return tester.getSize(tile.first);
 }
 
 DashboardKpi _metric(String label, String value) {

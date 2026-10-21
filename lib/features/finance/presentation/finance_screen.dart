@@ -17,6 +17,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/equal_grid.dart';
 import '../../../shared/widgets/entity_card.dart';
 import '../../../shared/widgets/filter_bar.dart';
 import '../../../shared/widgets/page_header.dart';
@@ -263,70 +264,54 @@ class _WalletHeader extends ConsumerWidget {
       onRetry: () => ref.invalidate(walletProvider),
       builder: (wallet) {
         final currency = wallet?.currency;
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final columns = constraints.maxWidth >= 1100
-                ? 5
-                : constraints.maxWidth >= 720
-                ? 3
-                : constraints.maxWidth >= 420
-                ? 2
-                : 1;
-            final itemWidth =
-                (constraints.maxWidth - (12 * (columns - 1))) / columns;
-            final cards = [
-              (
-                context.tr('finance.available'),
-                wallet?.availableBalance ?? 0,
-                Icons.account_balance_wallet_outlined,
-                IconTone.success,
+        final cards = [
+          (
+            context.tr('finance.available'),
+            wallet?.availableBalance ?? 0,
+            Icons.account_balance_wallet_outlined,
+            IconTone.success,
+          ),
+          (
+            context.tr('finance.pending'),
+            wallet?.pendingBalance ?? 0,
+            Icons.hourglass_bottom_outlined,
+            IconTone.warning,
+          ),
+          (
+            context.tr('finance.reserved'),
+            wallet?.reservedBalance ?? 0,
+            Icons.lock_outline,
+            IconTone.coral,
+          ),
+          (
+            context.tr('finance.lifetimeEarned'),
+            wallet?.lifetimeEarned ?? 0,
+            Icons.trending_up_rounded,
+            IconTone.teal,
+          ),
+          (
+            context.tr('finance.lifetimeWithdrawn'),
+            wallet?.lifetimeWithdrawn ?? 0,
+            Icons.south_west_rounded,
+            IconTone.info,
+          ),
+        ];
+        return EqualGrid(
+          minItemWidth: 200,
+          maxColumns: 4,
+          children: [
+            for (final card in cards)
+              MetricCard(
+                label: card.$1,
+                value: Formatters.money(
+                  card.$2,
+                  currency: currency,
+                  locale: locale,
+                ),
+                icon: card.$3,
+                tone: card.$4,
               ),
-              (
-                context.tr('finance.pending'),
-                wallet?.pendingBalance ?? 0,
-                Icons.hourglass_bottom_outlined,
-                IconTone.warning,
-              ),
-              (
-                context.tr('finance.reserved'),
-                wallet?.reservedBalance ?? 0,
-                Icons.lock_outline,
-                IconTone.coral,
-              ),
-              (
-                context.tr('finance.lifetimeEarned'),
-                wallet?.lifetimeEarned ?? 0,
-                Icons.trending_up_rounded,
-                IconTone.teal,
-              ),
-              (
-                context.tr('finance.lifetimeWithdrawn'),
-                wallet?.lifetimeWithdrawn ?? 0,
-                Icons.south_west_rounded,
-                IconTone.info,
-              ),
-            ];
-            return Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                for (final card in cards)
-                  SizedBox(
-                    width: itemWidth,
-                    child: MetricCard(
-                      label: card.$1,
-                      value: Formatters.money(
-                        card.$2,
-                        currency: currency,
-                        locale: locale,
-                      ),
-                      icon: card.$3,
-                      tone: card.$4,
-                    ),
-                  ),
-              ],
-            );
-          },
+          ],
         );
       },
     );

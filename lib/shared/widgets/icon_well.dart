@@ -24,7 +24,7 @@ class IconWell extends StatelessWidget {
       };
 
   double get _icon => switch (size) {
-        IconWellSize.sm => 16,
+        IconWellSize.sm => 18,
         IconWellSize.md => 20,
         IconWellSize.lg => 24,
       };

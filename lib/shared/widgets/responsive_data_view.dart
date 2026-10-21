@@ -183,12 +183,11 @@ class _DesktopDataTableState<T> extends State<_DesktopDataTable<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     final wide = widget.viewportWidth >= 1440;
     final headingStyle = TextStyle(
       color: AppColors.muted,
       fontWeight: FontWeight.w700,
-      letterSpacing: rtl ? 0 : 0.6,
+      letterSpacing: 0,
       fontSize: 13,
       height: 1.3,
     );
@@ -223,7 +222,7 @@ class _DesktopDataTableState<T> extends State<_DesktopDataTable<T>> {
                       Padding(
                         padding: padding,
                         child: Text(
-                          rtl ? column.label : column.label.toUpperCase(),
+                          column.label,
                           maxLines: 1,
                           softWrap: false,
                           style: headingStyle,

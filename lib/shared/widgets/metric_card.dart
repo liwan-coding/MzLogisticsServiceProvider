@@ -24,48 +24,94 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final body = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 132),
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.muted,
-                        fontWeight: FontWeight.w600,
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 16, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    if (icon != null) ...[
+                      IconWell(icon: icon!, tone: tone, size: IconWellSize.md),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
                       ),
+                    ),
+                  ],
                 ),
-              ),
-              if (icon != null) IconWell(icon: icon!, tone: tone, size: IconWellSize.sm),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.ink,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                const SizedBox(height: 14),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                      letterSpacing: rtl ? 0 : -0.3,
+                      color: AppColors.ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
                 ),
-          ),
-          if (hint != null && hint!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              hint!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.muted),
+                if (hint != null && hint!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    hint!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 13,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
+          PositionedDirectional(
+            start: 0,
+            top: 0,
+            bottom: 0,
+            width: 4,
+            child: ColoredBox(color: tone.foreground),
+          ),
         ],
       ),
     );
 
     return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
       clipBehavior: Clip.antiAlias,
-      child: onTap == null ? child : InkWell(onTap: onTap, child: child),
+      color: Color.alphaBlend(
+        tone.background.withValues(alpha: 0.72),
+        AppColors.white,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppColors.radius),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: onTap == null ? body : InkWell(onTap: onTap, child: body),
     );
   }
 }

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/page_visuals.dart';
 import '../../../shared/providers/session_provider.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/app_shell.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/icon_well.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -21,7 +23,6 @@ class MoreScreen extends ConsumerWidget {
         .where((group) => group.items.isNotEmpty)
         .toList();
     final organization = session.user?.organization?.name?.trim() ?? '';
-    final rtl = Directionality.of(context) == TextDirection.rtl;
 
     return AppPage(
       child: Column(
@@ -44,21 +45,20 @@ class MoreScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
                       child: Text(
-                        rtl
-                            ? context.tr(navSectionLabel(sections[index].section))
-                            : context.tr(navSectionLabel(sections[index].section)).toUpperCase(),
-                        style: TextStyle(
+                        context.tr(navSectionLabel(sections[index].section)),
+                        style: const TextStyle(
                           color: AppColors.muted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: rtl ? 0 : 0.6,
-                          height: 1.3,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                          height: 1.35,
                         ),
                       ),
                     ),
                     for (final item in sections[index].items)
                       _MoreRow(
                         icon: item.icon,
+                        tone: PageVisuals.of(item.path).tone,
                         label: context.tr(item.labelKey),
                         onTap: () => context.go(item.path),
                       ),
@@ -109,11 +109,13 @@ class MoreScreen extends ConsumerWidget {
 class _MoreRow extends StatelessWidget {
   const _MoreRow({
     required this.icon,
+    required this.tone,
     required this.label,
     required this.onTap,
   });
 
   final IconData icon;
+  final IconTone tone;
   final String label;
   final VoidCallback onTap;
 
@@ -122,19 +124,20 @@ class _MoreRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
+        constraints: const BoxConstraints(minHeight: 52),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.teal800),
+              IconWell(icon: icon, tone: tone, size: IconWellSize.sm),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
                   style: const TextStyle(
                     color: AppColors.ink,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
                     height: 1.35,
                   ),
                 ),

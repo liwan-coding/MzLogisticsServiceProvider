@@ -6,7 +6,6 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/permissions/app_permissions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/page_visuals.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/directional_text.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/trip.dart';
@@ -14,6 +13,7 @@ import '../../../shared/providers/session_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
+import '../../../shared/widgets/equal_grid.dart';
 import '../../../shared/widgets/filter_bar.dart';
 import '../../../shared/widgets/icon_well.dart';
 import '../../../shared/widgets/info_grid.dart';
@@ -106,49 +106,28 @@ class DispatchScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final columns = Breakpoints.metricColumns(
-                        constraints.maxWidth,
-                      ).clamp(1, 3);
-                      final gap = 12.0;
-                      final width =
-                          (constraints.maxWidth - (gap * (columns - 1))) /
-                          columns;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: gap,
-                        children: [
-                          SizedBox(
-                            width: width,
-                            child: MetricCard(
-                              label: context.tr('dispatch.waitingJobs'),
-                              value: '${groups.length}',
-                              icon: Icons.work_outline_rounded,
-                              tone: IconTone.warning,
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: MetricCard(
-                              label: context.tr('dispatch.waitingTrips'),
-                              value: '$waitingTrips',
-                              icon: Icons.route_outlined,
-                              tone: IconTone.coral,
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: MetricCard(
-                              label: context.tr('dispatch.quotedNeed'),
-                              value: '$quotedTrucks',
-                              icon: Icons.fire_truck_outlined,
-                              tone: IconTone.teal,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                  EqualGrid(
+                    maxColumns: 3,
+                    children: [
+                      MetricCard(
+                        label: context.tr('dispatch.waitingJobs'),
+                        value: '${groups.length}',
+                        icon: Icons.work_outline_rounded,
+                        tone: IconTone.warning,
+                      ),
+                      MetricCard(
+                        label: context.tr('dispatch.waitingTrips'),
+                        value: '$waitingTrips',
+                        icon: Icons.route_outlined,
+                        tone: IconTone.coral,
+                      ),
+                      MetricCard(
+                        label: context.tr('dispatch.quotedNeed'),
+                        value: '$quotedTrucks',
+                        icon: Icons.fire_truck_outlined,
+                        tone: IconTone.teal,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   for (var i = 0; i < groups.length; i++) ...[

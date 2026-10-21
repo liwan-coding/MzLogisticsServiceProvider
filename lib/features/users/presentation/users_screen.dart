@@ -6,7 +6,6 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/permissions/app_permissions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/page_visuals.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/access_role.dart';
 import '../../../shared/models/user.dart';
@@ -15,6 +14,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_page.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/equal_grid.dart';
 import '../../../shared/widgets/entity_card.dart';
 import '../../../shared/widgets/filter_bar.dart';
 import '../../../shared/widgets/icon_well.dart';
@@ -350,45 +350,28 @@ class _Metrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = Breakpoints.metricColumns(constraints.maxWidth).clamp(1, 3);
-        final gap = 12.0;
-        final width = (constraints.maxWidth - (gap * (columns - 1))) / columns;
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            SizedBox(
-              width: width,
-              child: MetricCard(
-                label: context.tr('users.kpiRoles'),
-                value: '$roles',
-                icon: Icons.shield_outlined,
-                tone: IconTone.teal,
-              ),
-            ),
-            SizedBox(
-              width: width,
-              child: MetricCard(
-                label: context.tr('users.kpiUsers'),
-                value: users?.toString() ?? '—',
-                icon: Icons.groups_outlined,
-                tone: IconTone.info,
-              ),
-            ),
-            SizedBox(
-              width: width,
-              child: MetricCard(
-                label: context.tr('users.kpiAccess'),
-                value: '$access',
-                icon: Icons.key_outlined,
-                tone: IconTone.coral,
-              ),
-            ),
-          ],
-        );
-      },
+    return EqualGrid(
+      maxColumns: 3,
+      children: [
+        MetricCard(
+          label: context.tr('users.kpiRoles'),
+          value: '$roles',
+          icon: Icons.shield_outlined,
+          tone: IconTone.teal,
+        ),
+        MetricCard(
+          label: context.tr('users.kpiUsers'),
+          value: users?.toString() ?? '—',
+          icon: Icons.groups_outlined,
+          tone: IconTone.info,
+        ),
+        MetricCard(
+          label: context.tr('users.kpiAccess'),
+          value: '$access',
+          icon: Icons.key_outlined,
+          tone: IconTone.coral,
+        ),
+      ],
     );
   }
 }

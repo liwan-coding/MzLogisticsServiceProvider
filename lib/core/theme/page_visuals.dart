@@ -154,6 +154,18 @@ extension IconToneColors on IconTone {
     };
   }
 
+  Color get onDark {
+    return switch (this) {
+      IconTone.teal => const Color(0xFFB8F0F0),
+      IconTone.coral => const Color(0xFFFFE3A3),
+      IconTone.info => const Color(0xFFC9E4F8),
+      IconTone.success => const Color(0xFFC6ECD8),
+      IconTone.warning => const Color(0xFFFFE0A8),
+      IconTone.danger => const Color(0xFFF6CFCB),
+      IconTone.muted => AppColors.onSidebarMuted,
+    };
+  }
+
   Color get background {
     return switch (this) {
       IconTone.teal => AppColors.tealSoft,

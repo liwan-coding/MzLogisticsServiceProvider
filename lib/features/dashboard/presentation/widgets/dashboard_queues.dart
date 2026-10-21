@@ -7,6 +7,7 @@ import '../../../../core/utils/directional_text.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/page_visuals.dart';
 import '../../../../shared/providers/session_provider.dart';
+import '../../../../shared/widgets/equal_grid.dart';
 import '../../../../shared/widgets/icon_well.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import 'dashboard_kpi.dart';
@@ -49,46 +50,7 @@ class DashboardQueueGrid extends StatelessWidget {
     if (panels.isEmpty) {
       return const SizedBox.shrink();
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        var columns = 1;
-        if (constraints.maxWidth >= 1000) {
-          columns = 3;
-        } else if (constraints.maxWidth >= 640) {
-          columns = 2;
-        }
-        if (columns > panels.length) {
-          columns = panels.length;
-        }
-        return Column(
-          children: [
-            for (var index = 0; index < panels.length; index += columns) ...[
-              if (index > 0) const SizedBox(height: 16),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (
-                      var cell = index;
-                      cell < index + columns && cell < panels.length;
-                      cell++
-                    ) ...[
-                      if (cell > index) const SizedBox(width: 16),
-                      Expanded(child: panels[cell]),
-                    ],
-                    if (panels.length - index < columns)
-                      Spacer(
-                        flex:
-                            columns - (panels.length - index).clamp(0, columns),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        );
-      },
-    );
+    return EqualGrid(minItemWidth: 320, maxColumns: 3, children: panels);
   }
 }
 

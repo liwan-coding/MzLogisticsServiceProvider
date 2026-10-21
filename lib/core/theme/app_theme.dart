@@ -179,9 +179,9 @@ class AppTheme {
         dividerThickness: 1,
         headingTextStyle: textTheme.labelMedium?.copyWith(
           color: AppColors.muted,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+          fontSize: 13,
         ),
         dataTextStyle: textTheme.bodyMedium,
       ),
@@ -218,7 +218,7 @@ class AppTheme {
           return TextStyle(
             fontFamily: fontFamily,
             fontFamilyFallback: _fallbacks,
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected ? AppColors.teal800 : AppColors.muted,
           );

@@ -135,7 +135,16 @@ class _FactRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(fact.icon, size: 18, color: AppColors.teal800),
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.tealSoft,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Icon(fact.icon, size: 14, color: AppColors.teal800),
+          ),
           const SizedBox(width: 8),
           Expanded(
             flex: 5,
