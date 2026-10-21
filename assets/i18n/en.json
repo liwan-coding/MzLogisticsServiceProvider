@@ -72,7 +72,22 @@
     "accountSectionHint": "Sign-in details for the company admin",
     "reviewNote": "The account is activated after company verification.",
     "brandPointWorkspace": "One workspace for fleet, quotations, and operations.",
-    "brandPointReview": "Accounts are reviewed before the workspace can be used."
+    "brandPointReview": "Accounts are reviewed before the workspace can be used.",
+    "forgotPassword": "Forgot password",
+    "forgotSubtitle": "Enter your email. If an account exists, we will send a 6-digit code.",
+    "sendCode": "Send code",
+    "sendingCode": "Sending…",
+    "resetTitle": "Choose a new password",
+    "resetSubtitle": "Enter the code sent to {email} and choose a new password.",
+    "code": "Reset code",
+    "codeInvalid": "Enter the 6 digits from the email",
+    "savePassword": "Save password",
+    "savingPassword": "Saving…",
+    "passwordUpdated": "Password updated. Sign in with the new password.",
+    "resendCode": "Resend code",
+    "codeResent": "If an account exists, the code is on its way. Wait a minute before requesting another.",
+    "tooManyAttempts": "Too many attempts. Wait a moment and try again.",
+    "useDifferentEmail": "Use a different email"
   },
   "common": {
     "save": "Save",

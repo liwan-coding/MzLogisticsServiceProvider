@@ -81,7 +81,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscureText: true,
             validator: (value) => AppValidators.required(value, context.tr('validation.required')),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton(
+              onPressed: () => context.go('/forgot-password'),
+              child: Text(context.tr('auth.forgotPassword')),
+            ),
+          ),
+          const SizedBox(height: 12),
           AppButton(
             label: _loading ? context.tr('auth.signingIn') : context.tr('auth.signIn'),
             onPressed: _submit,

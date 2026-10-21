@@ -71,6 +71,24 @@ class AuthRepository {
     }
   }
 
+  Future<void> forgotPassword(String email) {
+    return _api.post(ApiEndpoints.forgotPassword, data: {'email': email});
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+    required String passwordConfirmation,
+  }) {
+    return _api.post(ApiEndpoints.resetPassword, data: {
+      'email': email,
+      'code': code,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+    });
+  }
+
   AuthSession _sessionFrom(Map<String, dynamic> response) {
     final data = asMap(response['data']);
     return AuthSession(

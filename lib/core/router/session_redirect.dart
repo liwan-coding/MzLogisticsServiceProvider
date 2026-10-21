@@ -1,6 +1,6 @@
 import '../../shared/providers/session_provider.dart';
 
-const authEntryPaths = {'/login', '/register'};
+const authEntryPaths = {'/login', '/register', '/forgot-password', '/reset-password'};
 
 /// Decides where startup should go once the saved session is known.
 ///

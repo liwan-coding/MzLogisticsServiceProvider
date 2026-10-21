@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/company/presentation/company_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
@@ -82,6 +84,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       fadeRoute('/login', (context, state) => const LoginScreen()),
       fadeRoute('/register', (context, state) => const RegisterScreen()),
+      fadeRoute('/forgot-password', (context, state) => const ForgotPasswordScreen()),
+      fadeRoute(
+        '/reset-password',
+        (context, state) => ResetPasswordScreen(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
+      ),
       ShellRoute(
         builder: (context, state, child) => _AuthenticatedShell(child: child),
         routes: [

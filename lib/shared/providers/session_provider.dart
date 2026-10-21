@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/push/push_notifications.dart';
+import '../../core/l10n/locale_controller.dart';
 import '../../core/permissions/app_permissions.dart';
 import '../../core/storage/token_storage.dart';
 import '../../features/auth/data/auth_repository.dart';
@@ -28,6 +29,7 @@ final unauthorizedTickProvider = StateProvider<int>((ref) => 0);
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(
     tokenStorage: ref.watch(tokenStorageProvider),
+    localeCode: () => ref.read(localeControllerProvider).languageCode,
     onUnauthorized: () {
       ref.read(unauthorizedTickProvider.notifier).state++;
     },

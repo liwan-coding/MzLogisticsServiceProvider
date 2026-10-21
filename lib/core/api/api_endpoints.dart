@@ -3,6 +3,8 @@ class ApiEndpoints {
 
   static const login = '/auth/login';
   static const registerProvider = '/auth/register/provider';
+  static const forgotPassword = '/auth/forgot-password';
+  static const resetPassword = '/auth/reset-password';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
   static const password = '/auth/password';

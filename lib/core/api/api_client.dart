@@ -9,6 +9,7 @@ class ApiClient {
   ApiClient({
     required this._tokenStorage,
     required this._onUnauthorized,
+    this._localeCode,
     Dio? dio,
   })  : _dio = dio ??
             Dio(
@@ -29,6 +30,10 @@ class ApiClient {
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          final locale = _localeCode?.call();
+          if (locale != null && locale.isNotEmpty) {
+            options.headers['Accept-Language'] = locale;
+          }
           handler.next(options);
         },
         onError: (error, handler) async {
@@ -45,6 +50,7 @@ class ApiClient {
   final Dio _dio;
   final TokenStorage _tokenStorage;
   final void Function() _onUnauthorized;
+  final String Function()? _localeCode;
 
   Future<Map<String, dynamic>> get(
     String path, {

@@ -96,6 +96,25 @@ void main() {
     expect(safeInternalPath('/../dashboard'), isNull);
   });
 
+  test('password reset stays available before sign in', () {
+    expect(
+      resolveSessionRedirect(
+        session: const SessionState(ready: true),
+        location: '/forgot-password',
+        uri: Uri.parse('/forgot-password'),
+      ),
+      isNull,
+    );
+    expect(
+      resolveSessionRedirect(
+        session: const SessionState(ready: true),
+        location: '/reset-password',
+        uri: Uri.parse('/reset-password?email=ops@example.com'),
+      ),
+      isNull,
+    );
+  });
+
   test('signed-in users are sent to the dashboard from sign in', () {
     expect(
       resolveSessionRedirect(

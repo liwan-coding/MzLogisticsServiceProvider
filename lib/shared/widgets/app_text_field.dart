@@ -19,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.inputFormatters,
     this.hint,
     this.showRequiredHint = true,
+    this.textDirection,
   });
 
   final String label;
@@ -33,6 +34,7 @@ class AppTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? hint;
   final bool showRequiredHint;
+  final TextDirection? textDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class AppTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          textDirection: textDirection,
           validator: validator,
           maxLines: maxLines,
           enabled: enabled,
