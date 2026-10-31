@@ -9,6 +9,7 @@ Future<bool> showConfirmDialog(
 }) async {
   final result = await showDialog<bool>(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return AlertDialog(
         content: Text(message),

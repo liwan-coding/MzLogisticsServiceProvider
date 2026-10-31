@@ -20,6 +20,7 @@ Future<Settlement?> showRequestWithdrawalDialog(
 }) {
   return showDialog<Settlement>(
     context: context,
+    barrierDismissible: false,
     builder: (context) => _RequestWithdrawalDialog(wallet: wallet),
   );
 }

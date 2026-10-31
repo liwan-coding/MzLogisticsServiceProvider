@@ -23,6 +23,7 @@ Future<AccessRole?> showCreateRoleDialog(
 
   final created = await showDialog<AccessRole>(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return AlertDialog(
         title: Text(context.tr('users.createRole')),

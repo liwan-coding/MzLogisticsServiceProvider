@@ -12,6 +12,7 @@ Future<void> showRecordDetails(
 }) {
   return showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (dialogContext) {
       return AlertDialog(
         title: Text(title),

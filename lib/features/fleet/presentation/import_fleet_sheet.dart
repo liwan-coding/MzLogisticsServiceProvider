@@ -36,6 +36,7 @@ Future<void> showFleetImportSheet(
 ) {
   return showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (_) => _FleetImportDialog(request: request),
   );
 }

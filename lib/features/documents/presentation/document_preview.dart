@@ -57,6 +57,7 @@ Future<void> showDocumentImage(
 }) {
   return showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (dialogContext) {
       final viewport = MediaQuery.sizeOf(dialogContext);
       return Dialog(

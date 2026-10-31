@@ -17,6 +17,7 @@ import '../../fleet/presentation/fleet_screen.dart';
 Future<void> showImportDriversSheet(BuildContext context, WidgetRef ref) {
   return showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (_) => const _ImportDriversDialog(),
   );
 }

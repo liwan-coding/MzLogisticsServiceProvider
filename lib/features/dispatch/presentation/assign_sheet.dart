@@ -74,6 +74,7 @@ Future<void> showAssignSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    isDismissible: false,
     showDragHandle: true,
     backgroundColor: AppColors.white,
     shape: const RoundedRectangleBorder(

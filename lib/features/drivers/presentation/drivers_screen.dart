@@ -243,6 +243,7 @@ class DriversScreen extends ConsumerWidget {
     var closing = false;
     await showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -576,6 +577,7 @@ Future<void> _showInviteResult(
   final code = formatActivationCode(result.activationCode);
   await showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return AlertDialog(
         title: Text(
